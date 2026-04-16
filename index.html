@@ -550,7 +550,7 @@ async function fetchFXRate() {
   const key = localStorage.getItem('taoscan_apikey');
   if (!key) return;
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
     const r = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -878,8 +878,8 @@ async function callAPI(sys, usr) {
     showKeyModal();
     throw new Error('No API key set. Please add your Gemini API key to continue.');
   }
-  // Gemini 1.5 Flash — generous free tier, fast, capable
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+  // Gemini 2.0 Flash — free tier, fast, capable
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
