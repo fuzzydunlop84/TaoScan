@@ -459,7 +459,7 @@ select option{background:var(--chrome-2);}
     </div>
 
     <div class="cash-bar">
-      <span class="cash-bar-label">Portfolio</span>
+      <span class="cash-bar-label">Exchange Rate</span>
       <span class="fx-rate-text" id="fxRateDisplay">1 GBP = 1.2700 USD</span>
       <div class="cash-input-group">
         <span class="cash-bar-label">Cash per trade</span>
@@ -485,7 +485,7 @@ select option{background:var(--chrome-2);}
       </div>
     </div>
 
-    <div class="disclaimer">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves risk of capital loss.</div>
+    <div class="disclaimer">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves risk of capital loss. <strong style="color:var(--amber);">Prices shown are AI estimates based on recent training data — always verify current prices before entering any trade.</strong></div>
   </main>
 </div>
 </div>
@@ -796,7 +796,7 @@ function evRankAndTrim(trades){
 
 // ── MACRO ──────────────────────────────────────────────────────────────────────
 const MACRO_SYS=`Output ONLY raw JSON. No markdown, no prose.
-{"spy":{"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"qqq":{"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"ftse":{"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0,"key_resistance":0,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"overall_us_bias":"bullish|neutral|bearish","overall_uk_bias":"bullish|neutral|bearish","swing_filter":"max 10 words"}`;
+{"spy":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"qqq":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"ftse":{"current_price":0,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0,"key_resistance":0,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"overall_us_bias":"bullish|neutral|bearish","overall_uk_bias":"bullish|neutral|bearish","swing_filter":"max 10 words"}`;
 
 async function getMacroContext(){
   return callAPI(MACRO_SYS,`Current macro context for swing trading. SPY, QQQ, FTSE 100 S/R levels, trend, bias. Date:${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}.`);
@@ -826,12 +826,17 @@ function renderMacroPanel(macro){
   const sr=s=>({above_support:'Above Support',at_resistance:'At Resistance',at_support:'At Support',in_range:'In Range',below_resistance:'Below Resistance'}[s]||s);
   const ti=t=>t==='uptrend'?'↗ Uptrend':t==='downtrend'?'↘ Downtrend':'→ Sideways';
   const mkIdx=(key,sym,isPence)=>{const d=macro[key];if(!d)return'';const col=bc(d.macro_bias);
-    return`<div class="macro-index"><div class="macro-index-header"><span class="macro-sym">${sym}</span><span class="macro-trend" style="color:${col}">${ti(d.trend)}</span><span class="macro-bias-badge" style="color:${col};border-color:${col}">${bi(d.macro_bias)} ${d.macro_bias}</span></div><div class="macro-sr-row"><div class="macro-sr-item"><span class="macro-sr-lbl">Support</span><span class="macro-sr-val">${isPence?d.key_support:'$'+d.key_support}</span></div><div class="macro-sr-divider"></div><div class="macro-sr-item"><span class="macro-sr-lbl">vs Level</span><span class="macro-sr-val sr-pos">${sr(d.price_vs_sr)}</span></div><div class="macro-sr-divider"></div><div class="macro-sr-item"><span class="macro-sr-lbl">Resistance</span><span class="macro-sr-val">${isPence?d.key_resistance:'$'+d.key_resistance}</span></div></div><div class="macro-note">${d.note||''}</div></div>`;};
+    const price=d.current_price?(isPence?d.current_price.toLocaleString('en-GB'):'$'+d.current_price.toLocaleString('en-US')):'—';
+    const sup=isPence?d.key_support:'$'+d.key_support;
+    const res=isPence?d.key_resistance:'$'+d.key_resistance;
+    const pricePct=d.current_price&&d.key_support&&d.key_resistance?Math.round(((d.current_price-d.key_support)/(d.key_resistance-d.key_support))*100):null;
+    const barHtml=pricePct!==null?`<div style="margin:7px 0 5px;"><div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--sheen);margin-bottom:3px;"><span>S ${sup}</span><span>R ${res}</span></div><div style="height:5px;background:var(--chrome-4);border-radius:3px;overflow:visible;position:relative;"><div style="height:100%;width:${Math.min(100,Math.max(0,pricePct))}%;background:linear-gradient(90deg,var(--green-dim),${col});border-radius:3px;"></div><div style="position:absolute;top:-3px;left:calc(${Math.min(100,Math.max(0,pricePct))}% - 4px);width:8px;height:11px;background:${col};border-radius:2px;border:1px solid var(--bg);"></div></div></div>`:'';
+    return`<div class="macro-index"><div class="macro-index-header"><span class="macro-sym">${sym}</span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--white);">${price}</span><span class="macro-trend" style="color:${col}">${ti(d.trend)}</span><span class="macro-bias-badge" style="color:${col};border-color:${col}">${bi(d.macro_bias)} ${d.macro_bias}</span></div>${barHtml}<div class="macro-note">${sr(d.price_vs_sr)} · ${d.note||''}</div></div>`;};
   const uc=bc(macro.overall_us_bias||'neutral'),ukc=bc(macro.overall_uk_bias||'neutral');
   const usBias=macro.overall_us_bias||'neutral',ukBias=macro.overall_uk_bias||'neutral';
   const usIcon=usBias==='bullish'?'📈':usBias==='bearish'?'📉':'➡️';
   const ukIcon=ukBias==='bullish'?'📈':ukBias==='bearish'?'📉':'➡️';
-  return`<div class="macro-panel" id="macroPanel"><div class="macro-header" onclick="toggleMacro()"><div class="macro-title-row"><span class="macro-title">Market Overview</span><div class="macro-overall"><span style="color:${uc}">${usIcon} US ${usBias}</span><span class="macro-ov-sep">·</span><span style="color:${ukc}">${ukIcon} UK ${ukBias}</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;"><div class="macro-filter-note">${macro.swing_filter||''}</div><span class="macro-toggle" id="macroToggleBtn">▼ Show detail</span></div></div><div class="macro-body" id="macroBody"><div class="macro-indices">${mkIdx('spy','$SPY',false)}${mkIdx('qqq','$QQQ',false)}${mkIdx('ftse','FTSE',true)}</div></div></div><div class="tier-divider"></div>`;
+  return`<div class="macro-panel" id="macroPanel"><div class="macro-header" onclick="toggleMacro()"><div class="macro-title-row"><span class="macro-title">Market Overview</span><div class="macro-overall"><span style="color:${uc}">${usIcon} US ${usBias}</span><span class="macro-ov-sep">·</span><span style="color:${ukc}">${ukIcon} UK ${ukBias}</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;"><div class="macro-filter-note">${macro.swing_filter||''}</div><span class="macro-toggle" id="macroToggleBtn">▼ Show detail</span></div></div><div class="macro-body" id="macroBody"><div class="macro-indices">${mkIdx('spy','$SPY',false)}${mkIdx('qqq','$QQQ',false)}${mkIdx('ftse','FTSE',true)}</div><div style="padding:8px 18px;font-family:var(--mono);font-size:10px;color:var(--sheen);border-top:1px solid var(--chrome-4);">⚠ Prices are AI estimates — always verify current prices before trading</div></div></div><div class="tier-divider"></div>`;
 }
 
 // ── MACRO PRELOAD ─────────────────────────────────────────────────────────────
@@ -1019,6 +1024,7 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
           <div class="level-value">${c}${t.stop_price}</div>
         </div>
       </div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--sheen);margin:-6px 0 10px;padding:0 2px;">⚠ AI estimates — check current price before trading</div>
 
       <div class="cash-estimate">
         <div class="cash-box gain-box">
