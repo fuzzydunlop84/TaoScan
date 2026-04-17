@@ -851,11 +851,13 @@ function refreshCashEstimates(){
 // ── PRICE API ─────────────────────────────────────────────────────────────────
 const PRICES_URL = PROXY_URL.replace(/\/$/, '') + '/prices';
 
-// Twelve Data symbol format for LSE: TICKER:LSE
-// US stocks: TICKER (no suffix)
+// Twelve Data symbol format:
+// LSE: TICKER:LSE (strip any .L or .LON suffix the AI adds)
+// US: TICKER only
 function toTwelveSymbol(ticker, exchange) {
-  if (exchange === 'LSE') return ticker + ':LON';
-  return ticker; // NYSE/NASDAQ use ticker directly
+  const clean = ticker.replace(/\.(L|LON|LSE)$/i, '');
+  if (exchange === 'LSE') return clean + ':LSE';
+  return clean;
 }
 
 async function fetchPrices(symbols) {
