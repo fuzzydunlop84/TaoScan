@@ -447,7 +447,7 @@ select option{background:var(--chrome-2);}
           <option value="both">↕ Both</option>
         </select>
       </div>
-      <button class="scan-btn" id="scanBtn" onclick="runScan()">▶ SCAN</button>
+      <button class="scan-btn" id="scanBtn" onclick="runScan()" disabled>⏳ LOADING...</button>
     </div>
 
     <div class="cash-bar">
@@ -835,8 +835,23 @@ function renderMacroPanel(macro){
 // ── MACRO PRELOAD ─────────────────────────────────────────────────────────────
 let cachedMacro=null,macroLoadedAt=null;
 async function preloadMacro(){
-  try{setStatus('Loading market context...',true);cachedMacro=await getMacroContext();macroLoadedAt=Date.now();setStatus('Ready — click SCAN',false);}
-  catch(e){setStatus('Ready — click SCAN',false);}
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ LOADING...';
+  try{
+    setStatus('Loading market context — please wait...', true);
+    cachedMacro = await getMacroContext();
+    macroLoadedAt = Date.now();
+    // Wait 15s after macro loads before allowing scan — lets TPM window reset
+    setStatus('Market context loaded — preparing scanner...', true);
+    await waitWithCountdown(15, 'Ready in');
+    setStatus('Ready — click SCAN', false);
+  } catch(e){
+    setStatus('Ready — click SCAN', false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '▶ SCAN';
+  }
 }
 async function waitWithCountdown(seconds,label){
   for(let s=seconds;s>0;s--){setStatus(`${label} — resuming in ${s}s...`,true);await new Promise(r=>setTimeout(r,1000));}
