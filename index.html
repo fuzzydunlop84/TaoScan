@@ -457,7 +457,7 @@ select option{background:var(--chrome-2);}
     </div>
     <div class="header-right">
       <button class="history-toggle" id="historyToggle" onclick="toggleSidebar()">☰</button>
-      <div class="fx-display" id="fxDisplay">GBP/USD 1.2700</div>
+      <div class="fx-display" id="fxDisplay">USD</div>
       <div class="live-pill"><div class="live-dot"></div>LIVE</div>
       <div class="time-display" id="clock">--:--:--</div>
     </div>
@@ -474,27 +474,19 @@ select option{background:var(--chrome-2);}
     </div>
 
     <div class="cash-bar">
-      <span class="cash-bar-label">Exchange Rate</span>
-      <span class="fx-rate-text" id="fxRateDisplay">1 GBP = 1.2700 USD</span>
+      <span class="cash-bar-label">Currency</span>
+      <span class="fx-rate-text" id="fxRateDisplay">USD</span>
       <div class="cash-input-group">
         <span class="cash-bar-label">Cash per trade</span>
         <input class="cash-input" id="cashInput" type="number" value="1000" min="1" oninput="refreshCashEstimates()">
         <select id="cashCurrency" class="cash-input" style="width:64px;" onchange="refreshCashEstimates()">
-          <option value="GBP">GBP</option>
+          <option value="GBP" selected>GBP</option>
           <option value="USD">USD</option>
         </select>
       </div>
     </div>
 
     <div class="controls-panel" id="controlsBar">
-      <div class="control-group">
-        <span class="ctrl-label">Market</span>
-        <select id="marketSelect">
-          <option value="best">Auto — Best Opportunity</option>
-          <option value="LSE">UK (LSE) Only</option>
-          <option value="US">US Only</option>
-        </select>
-      </div>
       <div class="control-group">
         <span class="ctrl-label">Pattern</span>
         <select id="setupSelect">
@@ -577,7 +569,7 @@ const TOOLTIPS = {
   },
   rr: {
     title: 'What is Reward/Risk?',
-    text: 'For every £1 you risk, how much could you make.\n\nExample: A 2× reward/risk means if your stop loss is £50 away, your profit target is £100 away.\n\nHigher is better. We only recommend trades with at least 2× reward/risk.'
+    text: 'For every $1 you risk, how much could you make.\n\nExample: A 2× reward/risk means if your stop loss is $50 away, your profit target is $100 away.\n\nHigher is better. We only recommend trades with at least 2× reward/risk.'
   },
   stop: {
     title: 'What is "Get out if"?',
@@ -617,7 +609,7 @@ const TOOLTIPS = {
   },
   markettrend: {
     title: 'What does "goes with market" mean?',
-    text: 'Major stock indices like the S&P 500 (US) and FTSE 100 (UK) act as the tide that lifts or sinks most boats.\n\nA trade that goes WITH the current market direction has a higher chance of success than one going against it.\n\n✅ With market = trend is in your favour\n⚠️ Neutral = market is sideways, less tailwind\n❌ Against market = swimming against the current, higher risk'
+    text: 'Major stock indices like the S&P 500 and NASDAQ act as the tide that lifts or sinks most stocks.\n\nA trade that goes WITH the current market direction has a higher chance of success than one going against it.\n\n✅ With market = trend is in your favour\n⚠️ Neutral = market is sideways, less tailwind\n❌ Against market = swimming against the current, higher risk'
   }
 };
 
@@ -718,7 +710,7 @@ function openDetail(tradeJSON) {
 
     <div class="detail-section">
       <div class="detail-section-title">Trade Metrics</div>
-      <div class="detail-row"><span class="detail-key">Reward/Risk <button onclick="showTooltip('rr')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val">${t.rr_ratio}× — for every £1 risked, potential £${t.rr_ratio} gain</span></div>
+      <div class="detail-row"><span class="detail-key">Reward/Risk <button onclick="showTooltip('rr')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val">${t.rr_ratio}× — for every $1 risked, potential $${t.rr_ratio} gain</span></div>
       <div class="detail-row"><span class="detail-key">Edge Score <button onclick="showTooltip('edge')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val" style="color:${ev>=1?'var(--green)':ev>=0?'var(--amber)':'var(--red)'};">${ev>=0?'+':''}${ev.toFixed(2)} — ${evLabel}</span></div>
       <div class="detail-row"><span class="detail-key">Estimated hold time</span><span class="detail-val">${t.expected_days} days</span></div>
       <div class="detail-row"><span class="detail-key">Average win on this pattern</span><span class="detail-val">${t.backtest_avg_gain}%</span></div>
@@ -852,11 +844,11 @@ function refreshCashEstimates(){
 const PRICES_URL = PROXY_URL.replace(/\/$/, '') + '/prices';
 
 // Twelve Data symbol format:
-// LSE: TICKER:LSE (strip any .L or .LON suffix the AI adds)
+// LSE: TICKER:LON (strip any .L suffix the AI adds)
 // US: TICKER only
 function toTwelveSymbol(ticker, exchange) {
   const clean = ticker.replace(/\.(L|LON|LSE)$/i, '');
-  if (exchange === 'LSE') return clean + ':LSE';
+  if (exchange === 'LSE') return clean + ':LON';
   return clean;
 }
 
@@ -876,8 +868,7 @@ async function fetchPrices(symbols) {
 }
 
 async function fetchIndexPrices() {
-  const indexSymbols = ['SPY', 'QQQ', '^FTSE'];
-  return fetchPrices(indexSymbols);
+  return fetchPrices(['SPY', 'QQQ']);
 }
 
 async function enrichWithRealPrices(trades) {
@@ -889,8 +880,9 @@ async function enrichWithRealPrices(trades) {
     const entry = prices[sym];
     const realPrice = entry?.price;
     const priceTime = entry?.datetime || null;
+    const isLSE = t.exchange === 'LSE';
+
     if (realPrice && realPrice > 0) {
-      const isLSE = t.exchange === 'LSE';
       const ratio = realPrice / t.current_price;
       return {
         ...t,
@@ -904,7 +896,12 @@ async function enrichWithRealPrices(trades) {
         price_updated: true,
       };
     }
-    return t;
+    // No live price available
+    return {
+      ...t,
+      price_updated: false,
+      price_unavailable: 'Live price unavailable — verify before trading',
+    };
   });
 }
 
@@ -930,22 +927,19 @@ function evRankAndTrim(trades){
 
 // ── MACRO ──────────────────────────────────────────────────────────────────────
 const MACRO_SYS=`Output ONLY raw JSON. No markdown, no prose.
-{"spy":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"qqq":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"ftse":{"current_price":0,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0,"key_resistance":0,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"overall_us_bias":"bullish|neutral|bearish","overall_uk_bias":"bullish|neutral|bearish","swing_filter":"max 10 words"}`;
+{"spy":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"qqq":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"overall_us_bias":"bullish|neutral|bearish","swing_filter":"max 10 words"}`;
 
 async function getMacroContext(){
   // Fetch real index prices first
-  const indexPrices = await fetchPrices(['SPY', 'QQQ', '^FTSE']);
+  const indexPrices = await fetchPrices(['SPY', 'QQQ']);
   const spyPrice = indexPrices['SPY']?.price ? `SPY current price: $${indexPrices['SPY'].price.toFixed(2)}.` : '';
   const qqqPrice = indexPrices['QQQ']?.price ? `QQQ current price: $${indexPrices['QQQ'].price.toFixed(2)}.` : '';
-  const ftsePrice = indexPrices['^FTSE']?.price ? `FTSE 100 current price: ${Math.round(indexPrices['^FTSE'].price)}.` : '';
-  const realPriceContext = [spyPrice, qqqPrice, ftsePrice].filter(Boolean).join(' ');
+  const realPriceContext = [spyPrice, qqqPrice].filter(Boolean).join(' ');
 
-  const macroResult = await callAPI(MACRO_SYS,`Current macro context for swing trading. ${realPriceContext} Analyse SPY, QQQ, FTSE 100 S/R levels relative to these REAL current prices, trend, bias. Date:${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}.`);
-  // Attach real price datetimes to macro result for display
+  const macroResult = await callAPI(MACRO_SYS,`Current macro context for US swing trading. ${realPriceContext} Analyse SPY and QQQ S/R levels relative to these REAL current prices, trend, bias. Date:${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}.`);
   if(macroResult) {
     if(macroResult.spy) macroResult.spy.price_datetime = indexPrices['SPY']?.datetime || null;
     if(macroResult.qqq) macroResult.qqq.price_datetime = indexPrices['QQQ']?.datetime || null;
-    if(macroResult.ftse) macroResult.ftse.price_datetime = indexPrices['^FTSE']?.datetime || null;
   }
   return macroResult;
 }
@@ -954,14 +948,14 @@ function buildSysPrompt(minRR,direction){
   const learning=buildLearningContext();
   const dr=direction==='short'?'SHORT only. Entry near resistance, target support, stop above resistance.':direction==='both'?'BOTH long and short.':'LONG only. Buy near support, target resistance, stop below support.';
   return`Output ONLY raw JSON. No markdown, no prose.
-RULES: ${dr} S/R entries only. R:R>=${minRR}. LSE pence, US dollars 2dp. stop<buy<target longs. signals:3 max 3 words. sr_context:max 6 words. macro_alignment:aligned|neutral|divergent. additional_factors:max 2 items. thesis:max 6 words. sentiment_score:integer 0-100. win_rate 45-65%, sample 10-30.${learning}
-JSON:{"scan_summary":"max 6 words","trades":[{"rank":1,"ticker":"","company":"","exchange":"LSE|NYSE|NASDAQ","setup_type":"breakout|accumulation|momentum|breakdown|distribution","direction":"long|short","current_price":0,"buy_price":0,"target_price":0,"stop_price":0,"currency_symbol":"£|$","rr_ratio":0.0,"expected_days":0,"confidence_pct":0,"signals":["","",""],"additional_factors":[],"earnings_warning":false,"sentiment_score":0,"sentiment_label":"Positive|Neutral|Negative","backtest_win_rate":0,"backtest_sample":0,"backtest_avg_gain":0.0,"sr_context":"","macro_alignment":"aligned|neutral|divergent","key_support":0,"key_resistance":0,"thesis":"","liquidity_note":""}]}`;
+RULES: ${dr} S/R entries only. R:R>=${minRR}. US stocks only, prices in dollars 2dp. stop<buy<target longs. signals:3 max 3 words. sr_context:max 6 words. macro_alignment:aligned|neutral|divergent. additional_factors:max 2 items. thesis:max 6 words. sentiment_score:integer 0-100. win_rate 45-65%, sample 10-30.${learning}
+JSON:{"scan_summary":"max 6 words","trades":[{"rank":1,"ticker":"","company":"","exchange":"NYSE|NASDAQ","setup_type":"breakout|accumulation|momentum|breakdown|distribution","direction":"long|short","current_price":0,"buy_price":0,"target_price":0,"stop_price":0,"currency_symbol":"$","rr_ratio":0.0,"expected_days":0,"confidence_pct":0,"signals":["","",""],"additional_factors":[],"earnings_warning":false,"sentiment_score":0,"sentiment_label":"Positive|Neutral|Negative","backtest_win_rate":0,"backtest_sample":0,"backtest_avg_gain":0.0,"sr_context":"","macro_alignment":"aligned|neutral|divergent","key_support":0,"key_resistance":0,"thesis":"","liquidity_note":""}]}`;
 }
 
 const TIERS=[
-  {id:'large',label:'Large Companies',sublabel:'£50+ / $50+',liquidityNote:false,constraint:'Price above £50 (LSE) or $50 (US). Well-known highly liquid companies. Market cap >£500m/$5bn.'},
-  {id:'mid',label:'Mid-Size Companies',sublabel:'£10–49 / $10–49',liquidityNote:false,constraint:'Price £10-£49 (LSE) or $10-$49 (US). Mid-size companies.'},
-  {id:'small',label:'Smaller Companies',sublabel:'High Volume Only',liquidityNote:true,constraint:'Price below £10 (LSE) or $10 (US). MUST have avg daily vol >2M shares and tight spread. Include liquidity_note with avg daily vol.'}
+  {id:'large',label:'Large Companies',sublabel:'$50+',liquidityNote:false,constraint:'US stocks only. Price above $50. Well-known highly liquid large-cap. Market cap >$5bn. NYSE or NASDAQ.'},
+  {id:'mid',label:'Mid-Size Companies',sublabel:'$10–49',liquidityNote:false,constraint:'US stocks only. Price $10-$49. Mid-cap companies. NYSE or NASDAQ.'},
+  {id:'small',label:'Smaller Companies',sublabel:'High Volume Only',liquidityNote:true,constraint:'US stocks only. Price below $10. MUST have avg daily vol >2M shares and tight spread. NYSE or NASDAQ. Include liquidity_note.'}
 ];
 
 // ── MACRO PANEL ────────────────────────────────────────────────────────────────
@@ -981,11 +975,10 @@ function renderMacroPanel(macro){
     const pricePct=d.current_price&&d.key_support&&d.key_resistance?Math.round(((d.current_price-d.key_support)/(d.key_resistance-d.key_support))*100):null;
     const barHtml=pricePct!==null?`<div style="margin:7px 0 5px;"><div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--sheen);margin-bottom:3px;"><span>S ${sup}</span><span>R ${res}</span></div><div style="height:5px;background:var(--chrome-4);border-radius:3px;overflow:visible;position:relative;"><div style="height:100%;width:${Math.min(100,Math.max(0,pricePct))}%;background:linear-gradient(90deg,var(--green-dim),${col});border-radius:3px;"></div><div style="position:absolute;top:-3px;left:calc(${Math.min(100,Math.max(0,pricePct))}% - 4px);width:8px;height:11px;background:${col};border-radius:2px;border:1px solid var(--bg);"></div></div></div>`:'';
     return`<div class="macro-index"><div class="macro-index-header"><span class="macro-sym">${sym}</span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--white);">${price}</span>${priceTime}<span class="macro-trend" style="color:${col}">${ti(d.trend)}</span><span class="macro-bias-badge" style="color:${col};border-color:${col}">${bi(d.macro_bias)} ${d.macro_bias}</span></div>${barHtml}<div class="macro-note">${sr(d.price_vs_sr)} · ${d.note||''}</div></div>`;};
-  const uc=bc(macro.overall_us_bias||'neutral'),ukc=bc(macro.overall_uk_bias||'neutral');
-  const usBias=macro.overall_us_bias||'neutral',ukBias=macro.overall_uk_bias||'neutral';
+  const uc=bc(macro.overall_us_bias||'neutral');
+  const usBias=macro.overall_us_bias||'neutral';
   const usIcon=usBias==='bullish'?'📈':usBias==='bearish'?'📉':'➡️';
-  const ukIcon=ukBias==='bullish'?'📈':ukBias==='bearish'?'📉':'➡️';
-  return`<div class="macro-panel" id="macroPanel"><div class="macro-header" onclick="toggleMacro()"><div class="macro-title-row"><span class="macro-title">Market Overview</span><div class="macro-overall"><span style="color:${uc}">${usIcon} US ${usBias}</span><span class="macro-ov-sep">·</span><span style="color:${ukc}">${ukIcon} UK ${ukBias}</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;"><div class="macro-filter-note">${macro.swing_filter||''}</div><span class="macro-toggle" id="macroToggleBtn">▼ Show detail</span></div></div><div class="macro-body" id="macroBody"><div class="macro-indices">${mkIdx('spy','$SPY',false)}${mkIdx('qqq','$QQQ',false)}${mkIdx('ftse','FTSE',true)}</div><div style="padding:8px 18px;font-family:var(--mono);font-size:10px;color:var(--green);border-top:1px solid var(--chrome-4);">✓ Index prices sourced live from Twelve Data</div></div></div><div class="tier-divider"></div>`;
+  return`<div class="macro-panel" id="macroPanel"><div class="macro-header" onclick="toggleMacro()"><div class="macro-title-row"><span class="macro-title">Market Overview</span><div class="macro-overall"><span style="color:${uc}">${usIcon} US ${usBias}</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;"><div class="macro-filter-note">${macro.swing_filter||''}</div><span class="macro-toggle" id="macroToggleBtn">▼ Show detail</span></div></div><div class="macro-body" id="macroBody"><div class="macro-indices">${mkIdx('spy','$SPY',false)}${mkIdx('qqq','$QQQ',false)}</div><div style="padding:8px 18px;font-family:var(--mono);font-size:10px;color:var(--green);border-top:1px solid var(--chrome-4);">✓ Index prices sourced live from Twelve Data</div></div></div><div class="tier-divider"></div>`;
 }
 
 // ── LOADING TIPS ENGINE ───────────────────────────────────────────────────────
@@ -1031,11 +1024,11 @@ function stopTips() {
 
 // Step definitions
 const SCAN_STEPS = [
-  { id: 'macro',  label: 'Reading market context (SPY, QQQ, FTSE)' },
+  { id: 'macro',  label: 'Reading US market context (SPY, QQQ)' },
   { id: 'wait1',  label: 'Preparing large company scan' },
-  { id: 'large',  label: 'Scanning large companies (£50+ / $50+)' },
+  { id: 'large',  label: 'Scanning large companies ($50+)' },
   { id: 'wait2',  label: 'Preparing mid-size company scan' },
-  { id: 'mid',    label: 'Scanning mid-size companies (£10–49)' },
+  { id: 'mid',    label: 'Scanning mid-size companies ($10–49)' },
   { id: 'wait3',  label: 'Preparing smaller company scan' },
   { id: 'small',  label: 'Scanning smaller companies' },
 ];
@@ -1124,14 +1117,14 @@ async function runScan(){
   const minRR  = document.getElementById('rrSelect').value;
   const direction = document.getElementById('directionSelect').value;
   const today  = new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const mPref  = market==='best'?'Best market auto-selected.':market+' only';
+  const mPref = 'US stocks only (NYSE/NASDAQ).';
   const sFilt  = setup==='all'?'Any pattern':setup+' only';
   const dirFilt = direction==='long'?'LONG only':direction==='short'?'SHORT only':'BOTH';
   const sys    = buildSysPrompt(minRR, direction);
   const scanDateKey = new Date().toISOString().slice(0,10);
 
   // Build dynamic step list based on selected tiers
-  const dynamicSteps = [{ id: 'macro', label: 'Reading market context (SPY, QQQ, FTSE)' }];
+  const dynamicSteps = [{ id: 'macro', label: 'Reading US market context (SPY, QQQ)' }];
   selectedTiers.forEach((tier, i) => {
     dynamicSteps.push({ id: `wait${i+1}`, label: `Preparing ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()} scan` });
     dynamicSteps.push({ id: tier.id, label: `Scanning ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()}` });
@@ -1153,7 +1146,7 @@ async function runScan(){
   try {
     macroData = await getMacroContext();
     cachedMacro = macroData; macroLoadedAt = Date.now();
-    macroCtx = `MACRO: SPY ${macroData.spy?.trend} bias=${macroData.spy?.macro_bias} S=$${macroData.spy?.key_support} R=$${macroData.spy?.key_resistance}. QQQ bias=${macroData.qqq?.macro_bias}. FTSE bias=${macroData.ftse?.macro_bias}. US:${macroData.overall_us_bias} UK:${macroData.overall_uk_bias}. ${macroData.swing_filter||''}`;
+    macroCtx = `MACRO: SPY ${macroData.spy?.trend} bias=${macroData.spy?.macro_bias} S=$${macroData.spy?.key_support} R=$${macroData.spy?.key_resistance}. QQQ bias=${macroData.qqq?.macro_bias}. US:${macroData.overall_us_bias}. ${macroData.swing_filter||''}`;
   } catch(e) { console.warn('Macro failed', e); }
 
   // Build results area
@@ -1337,8 +1330,8 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
           <div class="level-value">${c}${t.stop_price}</div>
         </div>
       </div>
-      <div style="font-family:var(--mono);font-size:9px;margin:-6px 0 10px;padding:0 2px;color:${t.price_updated?'var(--green)':'var(--sheen)'};">
-        ${t.price_updated ? `✓ Live price${t.price_datetime ? ' · as of ' + t.price_datetime : ''}` : '⚠ AI estimate — verify before trading'}
+      <div style="font-family:var(--mono);font-size:9px;margin:-6px 0 10px;padding:0 2px;color:${t.price_updated?'var(--green)':t.price_unavailable?'var(--amber)':'var(--sheen)'};">
+        ${t.price_updated ? `✓ Live price (as at ${t.price_datetime})` : t.price_unavailable ? `⚠ ${t.price_unavailable}` : '⚠ AI estimate — verify before trading'}
       </div>
 
       <div class="cash-estimate">
