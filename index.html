@@ -222,22 +222,14 @@ select option{background:var(--chrome-2);}
 .risk-box .cash-val{color:var(--red);}
 .cash-dual{font-family:var(--mono);font-size:9px;color:var(--sheen);margin-top:2px;}
 
-/* Edge score */
-.edge-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:6px;margin-bottom:12px;cursor:pointer;}
-.edge-row.edge-strong{background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.25);}
-.edge-row.edge-fair{background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.25);}
-.edge-row.edge-weak{background:rgba(201,64,64,.06);border:1px solid rgba(201,64,64,.2);}
-.edge-score-num{font-family:var(--mono);font-size:26px;font-weight:700;line-height:1;flex-shrink:0;}
-.edge-strong .edge-score-num{color:var(--green);}
-.edge-fair .edge-score-num{color:var(--amber);}
-.edge-weak .edge-score-num{color:var(--red);}
-.edge-info{flex:1;}
-.edge-label{font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:.05em;}
-.edge-strong .edge-label{color:var(--green);}
-.edge-fair .edge-label{color:var(--amber);}
-.edge-weak .edge-label{color:var(--red);}
-.edge-sublabel{font-family:var(--mono);font-size:9px;color:var(--sheen);margin-top:2px;}
-.edge-info-btn{font-family:var(--mono);font-size:11px;color:var(--sheen);cursor:pointer;padding:3px 8px;border:1px solid var(--chrome-4);border-radius:3px;background:var(--chrome-2);flex-shrink:0;}
+/* Confidence front */
+.conf-front{margin-bottom:12px;}
+.conf-front-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+.conf-front-label{font-family:var(--mono);font-size:10px;color:var(--sheen);text-transform:uppercase;letter-spacing:.1em;}
+.conf-front-pct{font-family:var(--mono);font-size:22px;font-weight:700;line-height:1;}
+.conf-front-bar-bg{height:5px;background:var(--chrome-4);border-radius:3px;overflow:hidden;margin-bottom:5px;}
+.conf-front-bar-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.conf-front-sub{font-family:var(--mono);font-size:10px;color:var(--sheen);}
 
 /* Thesis */
 .thesis-row{font-family:var(--sans);font-size:13px;color:var(--titanium);padding:0 2px;margin-bottom:12px;line-height:1.5;}
@@ -645,6 +637,7 @@ function openDetail(tradeJSON) {
     <div class="detail-section">
       <div class="detail-section-title">Trade Metrics</div>
       <div class="detail-row"><span class="detail-key">Reward/Risk <button onclick="showTooltip('rr')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val">${t.rr_ratio}× — for every £1 risked, potential £${t.rr_ratio} gain</span></div>
+      <div class="detail-row"><span class="detail-key">Edge Score <button onclick="showTooltip('edge')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val" style="color:${ev>=1?'var(--green)':ev>=0?'var(--amber)':'var(--red)'};">${ev>=0?'+':''}${ev.toFixed(2)} — ${evLabel}</span></div>
       <div class="detail-row"><span class="detail-key">Estimated hold time</span><span class="detail-val">${t.expected_days} days</span></div>
       <div class="detail-row"><span class="detail-key">Average win on this pattern</span><span class="detail-val">${t.backtest_avg_gain}%</span></div>
     </div>
@@ -781,7 +774,7 @@ function parseJSON(raw){
   if(end>0)s=s.slice(0,end+1);return JSON.parse(s);
 }
 async function callAPI(sys,usr){
-  const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:[{role:'user',content:usr}],max_tokens:2000})});
+  const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:[{role:'user',content:usr}],max_tokens:3000})});
   const data=await res.json();if(!res.ok)throw new Error(typeof data.error==='string'?data.error:data.error?.message||'API error');
   return parseJSON(data.content.map(b=>b.text||'').join(''));
 }
@@ -806,8 +799,8 @@ function buildSysPrompt(minRR,direction){
   const learning=buildLearningContext();
   const dr=direction==='short'?'SHORT only. Entry near resistance, target support, stop above resistance.':direction==='both'?'BOTH long and short.':'LONG only. Buy near support, target resistance, stop below support.';
   return`Output ONLY raw JSON. No markdown, no prose.
-RULES: ${dr} S/R-based entries only. R:R>=${minRR}. LSE pence, US dollars. stop<buy<target for longs. signals:3 items max 3 words. sr_context:max 8 words. macro_alignment:aligned|neutral|divergent. additional_factors:max 3 items. thesis:max 8 words. sentiment_score must be 0-100 integer (NOT decimal). win_rate 45-65%, sample 10-30.${learning}
-JSON:{"scan_summary":"max 8 words","trades":[{"rank":1,"ticker":"","company":"","exchange":"LSE|NYSE|NASDAQ","setup_type":"breakout|accumulation|momentum|breakdown|distribution","direction":"long|short","current_price":0,"buy_price":0,"target_price":0,"stop_price":0,"currency_symbol":"£|$","rr_ratio":0.0,"expected_days":0,"confidence_pct":0,"signals":["","",""],"additional_factors":[],"earnings_warning":false,"sentiment_score":0,"sentiment_label":"Positive|Neutral|Negative","backtest_win_rate":0,"backtest_sample":0,"backtest_avg_gain":0.0,"sr_context":"","macro_alignment":"aligned|neutral|divergent","key_support":0,"key_resistance":0,"thesis":"","liquidity_note":""}]}`;
+RULES: ${dr} S/R entries only. R:R>=${minRR}. LSE pence, US dollars 2dp. stop<buy<target longs. signals:3 max 3 words. sr_context:max 6 words. macro_alignment:aligned|neutral|divergent. additional_factors:max 2 items. thesis:max 6 words. sentiment_score:integer 0-100. win_rate 45-65%, sample 10-30.${learning}
+JSON:{"scan_summary":"max 6 words","trades":[{"rank":1,"ticker":"","company":"","exchange":"LSE|NYSE|NASDAQ","setup_type":"breakout|accumulation|momentum|breakdown|distribution","direction":"long|short","current_price":0,"buy_price":0,"target_price":0,"stop_price":0,"currency_symbol":"£|$","rr_ratio":0.0,"expected_days":0,"confidence_pct":0,"signals":["","",""],"additional_factors":[],"earnings_warning":false,"sentiment_score":0,"sentiment_label":"Positive|Neutral|Negative","backtest_win_rate":0,"backtest_sample":0,"backtest_avg_gain":0.0,"sr_context":"","macro_alignment":"aligned|neutral|divergent","key_support":0,"key_resistance":0,"thesis":"","liquidity_note":""}]}`;
 }
 
 const TIERS=[
@@ -921,7 +914,10 @@ function renderFromData(tiers,macroData,scanDateKey){
 }
 
 function animateBars(trades,off){
-  trades.forEach((t,i)=>{const cf=document.getElementById(`conf-fill-${off+i}`);if(cf)cf.style.width=t.confidence_pct+'%';});
+  trades.forEach((t,i)=>{
+    const cf=document.getElementById(`conf-fill-${off+i}`);
+    if(cf)cf.style.width=t.confidence_pct+'%';
+  });
 }
 
 // ── TRADE TRACKER ──────────────────────────────────────────────────────────────
@@ -1039,13 +1035,13 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
         </div>
       </div>
 
-      <div class="edge-row ${evClass}" onclick="showTooltip('edge')">
-        <div class="edge-score-num">${ev>=0?'+':''}${ev.toFixed(2)}</div>
-        <div class="edge-info">
-          <div class="edge-label">${evLabel}</div>
-          <div class="edge-sublabel">${evSub}</div>
+      <div class="conf-front">
+        <div class="conf-front-header">
+          <span class="conf-front-label">Confidence</span>
+          <span class="conf-front-pct" style="color:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};">${t.confidence_pct}%</span>
         </div>
-        <button class="edge-info-btn">ℹ</button>
+        <div class="conf-front-bar-bg"><div class="conf-front-bar-fill" id="conf-fill-${gIdx}" style="width:0%;background:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};"></div></div>
+        <div class="conf-front-sub">${t.confidence_pct>=70?'High confidence setup':t.confidence_pct>=50?'Moderate confidence':'Lower confidence — proceed carefully'}</div>
       </div>
 
       <div class="thesis-label">Why this trade</div>
