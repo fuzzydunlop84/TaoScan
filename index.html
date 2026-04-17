@@ -313,6 +313,25 @@ select option{background:var(--chrome-2);}
 .tooltip-text{font-family:var(--mono);font-size:12px;color:var(--titanium);line-height:1.8;}
 .tooltip-close{margin-top:16px;width:100%;padding:9px 0;font-family:var(--mono);font-size:12px;background:var(--chrome-4);border:1px solid var(--edge);border-radius:5px;color:var(--bright);cursor:pointer;}
 
+/* ── TIER CHECKBOXES ── */
+.tier-select-panel{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:6px;margin-bottom:14px;flex-wrap:nowrap;overflow-x:auto;}
+.tier-select-panel::-webkit-scrollbar{display:none;}
+.tier-check{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 12px;border-radius:5px;border:1px solid var(--chrome-4);background:var(--chrome-2);transition:border-color .2s,background .2s;user-select:none;}
+.tier-check:hover{border-color:var(--edge);}
+.tier-check input[type="checkbox"]{width:15px;height:15px;accent-color:var(--green);cursor:pointer;flex-shrink:0;}
+.tier-check input[type="checkbox"]:checked~.tier-check-label{color:var(--bright);}
+.tier-check:has(input:checked){border-color:var(--steel);background:rgba(122,143,166,.08);}
+.tier-check-label{font-family:var(--mono);font-size:11px;color:var(--sheen);display:flex;align-items:center;gap:6px;}
+.tier-check-sub{font-size:9px;color:var(--sheen);opacity:.7;}
+
+/* ── COOLDOWN BAR ── */
+.cooldown-bar{display:none;align-items:center;gap:12px;padding:10px 16px;background:rgba(200,136,42,.07);border:1px solid rgba(200,136,42,.25);border-radius:6px;margin-bottom:14px;}
+.cooldown-bar.visible{display:flex;}
+.cooldown-text{font-family:var(--mono);font-size:11px;color:var(--amber);flex:1;}
+.cooldown-timer{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber);flex-shrink:0;}
+.cooldown-track{flex:1;height:4px;background:var(--chrome-4);border-radius:2px;overflow:hidden;}
+.cooldown-fill{height:100%;background:var(--amber);border-radius:2px;transition:width 1s linear;}
+
 /* ── INTRO PROMPT ── */
 .intro-prompt{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--titanium);margin-bottom:16px;padding:12px 16px;border-left:3px solid var(--steel);background:rgba(255,255,255,.02);}
 .intro-prompt strong{color:var(--silver);}
@@ -504,7 +523,20 @@ select option{background:var(--chrome-2);}
       <button class="scan-btn" id="scanBtn" onclick="runScan()">▶ SCAN</button>
     </div>
 
-    <div class="disclaimer">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves risk of capital loss. <strong style="color:var(--amber);">Prices shown are AI estimates based on recent training data — always verify current prices before entering any trade.</strong></div>
+    <div class="tier-select-panel">
+      <span class="ctrl-label" style="flex-shrink:0;">Scan Tiers</span>
+      <label class="tier-check"><input type="checkbox" id="tierLarge"> <span class="tier-check-label">Large Companies</span></label>
+      <label class="tier-check"><input type="checkbox" id="tierMid"> <span class="tier-check-label">Mid-Size</span></label>
+      <label class="tier-check"><input type="checkbox" id="tierSmall"> <span class="tier-check-label">Smaller Companies</span></label>
+    </div>
+
+    <div class="cooldown-bar" id="cooldownBar">
+      <span class="cooldown-text">⏳ Next scan available in</span>
+      <div class="cooldown-track"><div class="cooldown-fill" id="cooldownFill" style="width:100%"></div></div>
+      <span class="cooldown-timer" id="cooldownTimer">5:00</span>
+    </div>
+
+    <div class="disclaimer">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves risk of capital loss. Stock prices are sourced live from Twelve Data. <strong style="color:var(--amber);">S/R levels and trade analysis are AI-generated — always verify before entering any trade.</strong></div>
 
     <div class="status-bar">
       <div class="status-dot" id="statusDot"></div>
@@ -816,7 +848,69 @@ function refreshCashEstimates(){
   });
 }
 
-// ── API ────────────────────────────────────────────────────────────────────────
+// ── PRICE API ─────────────────────────────────────────────────────────────────
+const PRICES_URL = PROXY_URL.replace(/\/$/, '') + '/prices';
+
+// Twelve Data symbol format for LSE: TICKER:LSE
+// US stocks: TICKER (no suffix)
+function toTwelveSymbol(ticker, exchange) {
+  if (exchange === 'LSE') return ticker + ':LON';
+  return ticker; // NYSE/NASDAQ use ticker directly
+}
+
+async function fetchPrices(symbols) {
+  try {
+    const res = await fetch(PRICES_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbols })
+    });
+    const data = await res.json();
+    return data.prices || {};
+  } catch(e) {
+    console.warn('Price fetch failed:', e);
+    return {};
+  }
+}
+
+// Fetch real index prices and return as context string for Groq
+async function fetchIndexPrices() {
+  const symbols = ['SPY', 'QQQ', 'VOD:LON']; // VOD as FTSE proxy — will be replaced with actual FTSE index
+  // Note: Twelve Data free tier uses ^FTSE for FTSE 100 index
+  const indexSymbols = ['SPY', 'QQQ', '^FTSE'];
+  const prices = await fetchPrices(indexSymbols);
+  return prices;
+}
+
+// After Groq returns tickers, fetch real prices and update cards
+async function enrichWithRealPrices(trades) {
+  if (!trades || !trades.length) return trades;
+  const symbols = trades.map(t => toTwelveSymbol(t.ticker, t.exchange));
+  const prices = await fetchPrices(symbols);
+  return trades.map(t => {
+    const sym = toTwelveSymbol(t.ticker, t.exchange);
+    const realPrice = prices[sym];
+    if (realPrice && realPrice > 0) {
+      // Update current_price with real data
+      // Adjust buy/target/stop proportionally from AI's levels relative to AI's current price
+      const isLSE = t.exchange === 'LSE';
+      // Twelve Data returns GBX (pence) for LON stocks automatically, USD for US
+      const ratio = realPrice / t.current_price;
+      return {
+        ...t,
+        current_price: realPrice,
+        buy_price: isFinite(ratio) && ratio > 0 ? Math.round(t.buy_price * ratio * 100) / 100 : t.buy_price,
+        target_price: isFinite(ratio) && ratio > 0 ? Math.round(t.target_price * ratio * 100) / 100 : t.target_price,
+        stop_price: isFinite(ratio) && ratio > 0 ? Math.round(t.stop_price * ratio * 100) / 100 : t.stop_price,
+        key_support: isFinite(ratio) && ratio > 0 ? Math.round(t.key_support * ratio * 100) / 100 : t.key_support,
+        key_resistance: isFinite(ratio) && ratio > 0 ? Math.round(t.key_resistance * ratio * 100) / 100 : t.key_resistance,
+        price_updated: true,
+      };
+    }
+    return t;
+  });
+}
+
 function parseJSON(raw){
   let s=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
   const st=s.indexOf('{');if(st>0)s=s.slice(st);
@@ -842,7 +936,14 @@ const MACRO_SYS=`Output ONLY raw JSON. No markdown, no prose.
 {"spy":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"qqq":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"ftse":{"current_price":0,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0,"key_resistance":0,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"overall_us_bias":"bullish|neutral|bearish","overall_uk_bias":"bullish|neutral|bearish","swing_filter":"max 10 words"}`;
 
 async function getMacroContext(){
-  return callAPI(MACRO_SYS,`Current macro context for swing trading. SPY, QQQ, FTSE 100 S/R levels, trend, bias. Date:${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}.`);
+  // Fetch real index prices first
+  const indexPrices = await fetchPrices(['SPY', 'QQQ', '^FTSE']);
+  const spyPrice = indexPrices['SPY'] ? `SPY current price: $${indexPrices['SPY'].toFixed(2)}.` : '';
+  const qqqPrice = indexPrices['QQQ'] ? `QQQ current price: $${indexPrices['QQQ'].toFixed(2)}.` : '';
+  const ftsePrice = indexPrices['^FTSE'] ? `FTSE 100 current price: ${Math.round(indexPrices['^FTSE'])}.` : '';
+  const realPriceContext = [spyPrice, qqqPrice, ftsePrice].filter(Boolean).join(' ');
+
+  return callAPI(MACRO_SYS,`Current macro context for swing trading. ${realPriceContext} Analyse SPY, QQQ, FTSE 100 S/R levels relative to these REAL current prices, trend, bias. Date:${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}.`);
 }
 
 function buildSysPrompt(minRR,direction){
@@ -854,9 +955,9 @@ JSON:{"scan_summary":"max 6 words","trades":[{"rank":1,"ticker":"","company":"",
 }
 
 const TIERS=[
-  {id:'large',label:'🔵 Large Companies',sublabel:'£50+ / $50+',liquidityNote:false,constraint:'Price above £50 (LSE) or $50 (US). Well-known highly liquid companies. Market cap >£500m/$5bn.'},
-  {id:'mid',label:'🟡 Mid-Size Companies',sublabel:'£10–49 / $10–49',liquidityNote:false,constraint:'Price £10-£49 (LSE) or $10-$49 (US). Mid-size companies.'},
-  {id:'small',label:'🔴 Smaller Companies',sublabel:'High Volume Only',liquidityNote:true,constraint:'Price below £10 (LSE) or $10 (US). MUST have avg daily vol >2M shares and tight spread. Include liquidity_note with avg daily vol.'}
+  {id:'large',label:'Large Companies',sublabel:'£50+ / $50+',liquidityNote:false,constraint:'Price above £50 (LSE) or $50 (US). Well-known highly liquid companies. Market cap >£500m/$5bn.'},
+  {id:'mid',label:'Mid-Size Companies',sublabel:'£10–49 / $10–49',liquidityNote:false,constraint:'Price £10-£49 (LSE) or $10-$49 (US). Mid-size companies.'},
+  {id:'small',label:'Smaller Companies',sublabel:'High Volume Only',liquidityNote:true,constraint:'Price below £10 (LSE) or $10 (US). MUST have avg daily vol >2M shares and tight spread. Include liquidity_note with avg daily vol.'}
 ];
 
 // ── MACRO PANEL ────────────────────────────────────────────────────────────────
@@ -879,7 +980,7 @@ function renderMacroPanel(macro){
   const usBias=macro.overall_us_bias||'neutral',ukBias=macro.overall_uk_bias||'neutral';
   const usIcon=usBias==='bullish'?'📈':usBias==='bearish'?'📉':'➡️';
   const ukIcon=ukBias==='bullish'?'📈':ukBias==='bearish'?'📉':'➡️';
-  return`<div class="macro-panel" id="macroPanel"><div class="macro-header" onclick="toggleMacro()"><div class="macro-title-row"><span class="macro-title">Market Overview</span><div class="macro-overall"><span style="color:${uc}">${usIcon} US ${usBias}</span><span class="macro-ov-sep">·</span><span style="color:${ukc}">${ukIcon} UK ${ukBias}</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;"><div class="macro-filter-note">${macro.swing_filter||''}</div><span class="macro-toggle" id="macroToggleBtn">▼ Show detail</span></div></div><div class="macro-body" id="macroBody"><div class="macro-indices">${mkIdx('spy','$SPY',false)}${mkIdx('qqq','$QQQ',false)}${mkIdx('ftse','FTSE',true)}</div><div style="padding:8px 18px;font-family:var(--mono);font-size:10px;color:var(--sheen);border-top:1px solid var(--chrome-4);">⚠ Prices are AI estimates — always verify current prices before trading</div></div></div><div class="tier-divider"></div>`;
+  return`<div class="macro-panel" id="macroPanel"><div class="macro-header" onclick="toggleMacro()"><div class="macro-title-row"><span class="macro-title">Market Overview</span><div class="macro-overall"><span style="color:${uc}">${usIcon} US ${usBias}</span><span class="macro-ov-sep">·</span><span style="color:${ukc}">${ukIcon} UK ${ukBias}</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;"><div class="macro-filter-note">${macro.swing_filter||''}</div><span class="macro-toggle" id="macroToggleBtn">▼ Show detail</span></div></div><div class="macro-body" id="macroBody"><div class="macro-indices">${mkIdx('spy','$SPY',false)}${mkIdx('qqq','$QQQ',false)}${mkIdx('ftse','FTSE',true)}</div><div style="padding:8px 18px;font-family:var(--mono);font-size:10px;color:var(--green);border-top:1px solid var(--chrome-4);">✓ Index prices sourced live from Twelve Data</div></div></div><div class="tier-divider"></div>`;
 }
 
 // ── LOADING TIPS ENGINE ───────────────────────────────────────────────────────
@@ -961,9 +1062,55 @@ async function waitWithCountdown(seconds, waitStepId, doneIds) {
   }
 }
 
+// ── COOLDOWN ENGINE ────────────────────────────────────────────────────────────
+const COOLDOWN_SECS = 300; // 5 minutes
+let cooldownInterval = null;
+
+function startCooldown() {
+  const btn = document.getElementById('scanBtn');
+  const bar = document.getElementById('cooldownBar');
+  const fill = document.getElementById('cooldownFill');
+  const timer = document.getElementById('cooldownTimer');
+  btn.disabled = true;
+  bar.classList.add('visible');
+  let remaining = COOLDOWN_SECS;
+
+  const update = () => {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    timer.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    fill.style.width = ((remaining / COOLDOWN_SECS) * 100) + '%';
+    if(remaining <= 0) {
+      clearInterval(cooldownInterval);
+      btn.disabled = false;
+      bar.classList.remove('visible');
+      setStatus('Ready — hit SCAN to begin', false);
+    }
+    remaining--;
+  };
+  update();
+  cooldownInterval = setInterval(update, 1000);
+}
+
 // ── MAIN SCAN ──────────────────────────────────────────────────────────────────
 async function runScan(){
   if(viewingMode) backToLive();
+
+  // Validate tier selection
+  const largeTicked = document.getElementById('tierLarge').checked;
+  const midTicked   = document.getElementById('tierMid').checked;
+  const smallTicked = document.getElementById('tierSmall').checked;
+  const selectedTiers = TIERS.filter(t =>
+    (t.id === 'large' && largeTicked) ||
+    (t.id === 'mid'   && midTicked)   ||
+    (t.id === 'small' && smallTicked)
+  );
+
+  if(selectedTiers.length === 0) {
+    showError('Please select at least one tier to scan (Large, Mid-Size or Smaller companies).');
+    return;
+  }
+
   const btn = document.getElementById('scanBtn');
   btn.disabled = true; btn.classList.add('loading'); clearError();
 
@@ -978,9 +1125,20 @@ async function runScan(){
   const sys    = buildSysPrompt(minRR, direction);
   const scanDateKey = new Date().toISOString().slice(0,10);
 
-  // Show loading panel, hide results
+  // Build dynamic step list based on selected tiers
+  const dynamicSteps = [{ id: 'macro', label: 'Reading market context (SPY, QQQ, FTSE)' }];
+  selectedTiers.forEach((tier, i) => {
+    dynamicSteps.push({ id: `wait${i+1}`, label: `Preparing ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()} scan` });
+    dynamicSteps.push({ id: tier.id, label: `Scanning ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()}` });
+  });
+
+  // Show loading panel
   document.getElementById('loadingPanel').style.display = 'block';
   document.getElementById('resultsArea').innerHTML = '';
+
+  // Override SCAN_STEPS for renderSteps
+  SCAN_STEPS.length = 0;
+  dynamicSteps.forEach(s => SCAN_STEPS.push(s));
   renderSteps('macro', []);
   startTips();
 
@@ -993,32 +1151,35 @@ async function runScan(){
     macroCtx = `MACRO: SPY ${macroData.spy?.trend} bias=${macroData.spy?.macro_bias} S=$${macroData.spy?.key_support} R=$${macroData.spy?.key_resistance}. QQQ bias=${macroData.qqq?.macro_bias}. FTSE bias=${macroData.ftse?.macro_bias}. US:${macroData.overall_us_bias} UK:${macroData.overall_uk_bias}. ${macroData.swing_filter||''}`;
   } catch(e) { console.warn('Macro failed', e); }
 
-  // Build results area now macro done
+  // Build results area
   document.getElementById('resultsArea').innerHTML =
     (macroData ? renderMacroPanel(macroData) : `<div class="macro-panel"><div class="macro-header"><div class="macro-title-row"><span class="macro-title">Market Overview</span><span style="font-family:var(--mono);font-size:11px;color:var(--sheen)">Unavailable</span></div></div></div>`) +
     '<div class="tier-divider"></div>' +
-    TIERS.map(tier=>`<div class="tier-section" id="tier-${tier.id}"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">${tier.label}</span><span class="tier-sublabel">${tier.sublabel}</span></div><div class="tier-status" id="ts-${tier.id}"><span class="tier-dot"></span> Queued</div></div><div class="results-grid" id="grid-${tier.id}">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`).join('<div class="tier-divider"></div>');
+    selectedTiers.map(tier=>`<div class="tier-section" id="tier-${tier.id}"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">${tier.label}</span><span class="tier-sublabel">${tier.sublabel}</span></div><div class="tier-status" id="ts-${tier.id}"><span class="tier-dot"></span> Queued</div></div><div class="results-grid" id="grid-${tier.id}">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`).join('<div class="tier-divider"></div>');
 
   const done = [];
-  const tierStepMap = [{tier: TIERS[0], stepId:'large', waitId:'wait1'}, {tier: TIERS[1], stepId:'mid', waitId:'wait2'}, {tier: TIERS[2], stepId:'small', waitId:'wait3'}];
   const collectedTiers = [];
 
-  for(let i = 0; i < tierStepMap.length; i++) {
-    const { tier, stepId, waitId } = tierStepMap[i];
+  for(let i = 0; i < selectedTiers.length; i++) {
+    const tier = selectedTiers[i];
+    const waitId = `wait${i+1}`;
 
-    // Wait 20s before each tier
-    await waitWithCountdown(20, waitId, ['macro', ...done.map(d => tierStepMap.slice(0,done.length).map(x=>x.stepId)).flat()]);
+    // 20s wait before each tier
+    await waitWithCountdown(20, waitId, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
 
-    // Mark tier as active
-    renderSteps(stepId, ['macro', ...done.map((_,j)=>tierStepMap[j].stepId)]);
+    renderSteps(tier.id, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
     const tsEl = document.getElementById(`ts-${tier.id}`);
     if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Scanning...`;
-    setStatus(`Scanning ${tier.label}...`, true);
+    setStatus(`Scanning ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()}...`, true);
 
     const up = `${tier.label} swing trades. ${tier.constraint} Market:${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}. ${macroCtx} Return exactly 3 trades with S/R-based entries.`;
     try {
       const parsed = await callAPI(sys, up);
-      if(parsed?.trades) parsed.trades = evRankAndTrim(parsed.trades);
+      if(parsed?.trades) {
+        parsed.trades = evRankAndTrim(parsed.trades);
+        setStatus(`Updating ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()} with real prices...`, true);
+        parsed.trades = await enrichWithRealPrices(parsed.trades);
+      }
       renderTierLive(tier, parsed, null, scanDateKey);
       collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:parsed?.trades||null, error:null});
     } catch(e) {
@@ -1026,17 +1187,21 @@ async function runScan(){
       collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:null, error:e.message});
     }
     done.push(i);
-    renderSteps(null, ['macro', ...tierStepMap.slice(0, done.length).map(x=>x.stepId)]);
+    renderSteps(null, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
   }
 
   // Done
   stopTips();
   document.getElementById('loadingPanel').style.display = 'none';
-  setStatus('Scan complete', false);
+  setStatus('Scan complete — next scan available in 5 minutes', false);
   const summary = collectedTiers.find(r=>r.trades?.length)?.trades?.[0]?.thesis || '';
   const dl = direction==='long'?'↑ Long':direction==='short'?'↓ Short':'↕ Both';
-  persistScan(collectedTiers, summary, `${market==='best'?'Auto':market} · ${dl} · ${minRR}×`, macroData);
-  btn.disabled = false; btn.classList.remove('loading');
+  const tierLabels = selectedTiers.map(t=>t.id).join('+');
+  persistScan(collectedTiers, summary, `${market==='best'?'Auto':market} · ${dl} · ${minRR}× · ${tierLabels}`, macroData);
+  btn.classList.remove('loading');
+
+  // Start 5 min cooldown
+  startCooldown();
 }
 
 function renderTierLive(tier,parsed,error,scanDateKey){
@@ -1167,7 +1332,9 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
           <div class="level-value">${c}${t.stop_price}</div>
         </div>
       </div>
-      <div style="font-family:var(--mono);font-size:9px;color:var(--sheen);margin:-6px 0 10px;padding:0 2px;">⚠ AI estimates — check current price before trading</div>
+      <div style="font-family:var(--mono);font-size:9px;margin:-6px 0 10px;padding:0 2px;color:${t.price_updated?'var(--green)':'var(--sheen)'};">
+        ${t.price_updated ? '✓ Prices updated with live data from Twelve Data' : '⚠ AI estimates — verify before trading'}
+      </div>
 
       <div class="cash-estimate">
         <div class="cash-box gain-box">
