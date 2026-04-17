@@ -68,7 +68,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── HEADER ── */
 .main-content{flex:1;min-width:0;display:flex;flex-direction:column;}
 header{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,var(--chrome-2) 0%,var(--chrome-1) 100%);border-bottom:1px solid var(--edge);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:56px;box-shadow:0 1px 0 rgba(255,255,255,.04),0 2px 12px rgba(0,0,0,.4);}
-.logo{font-family:var(--sans);font-size:22px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;background:linear-gradient(135deg,var(--sheen) 0%,var(--silver) 40%,var(--white) 55%,var(--silver) 70%,var(--sheen) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5));}
+.logo-group{display:flex;flex-direction:column;gap:2px;}
+.logo{font-family:var(--sans);font-size:22px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;background:linear-gradient(135deg,var(--sheen) 0%,var(--silver) 40%,var(--white) 55%,var(--silver) 70%,var(--sheen) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5));line-height:1;}
+.tagline{font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.12em;color:var(--sheen);text-transform:uppercase;}
 .header-right{display:flex;align-items:center;gap:12px;}
 .live-pill{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:3px;background:rgba(76,175,125,.1);color:var(--green);border:1px solid var(--green-dim);letter-spacing:.08em;display:flex;align-items:center;gap:5px;}
 .live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:livepulse 2s infinite;}
@@ -307,6 +309,25 @@ select option{background:var(--chrome-2);}
 .tooltip-text{font-family:var(--mono);font-size:12px;color:var(--titanium);line-height:1.8;}
 .tooltip-close{margin-top:16px;width:100%;padding:9px 0;font-family:var(--mono);font-size:12px;background:var(--chrome-4);border:1px solid var(--edge);border-radius:5px;color:var(--bright);cursor:pointer;}
 
+/* ── LOADING PANEL ── */
+.loading-panel{background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:8px;padding:16px 18px;margin-bottom:20px;}
+.loading-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.loading-step{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;}
+.step-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;border:1px solid var(--chrome-4);}
+.step-icon.pending{background:var(--chrome-3);color:var(--sheen);}
+.step-icon.active{background:rgba(76,175,125,.15);border-color:var(--green-dim);color:var(--green);animation:livepulse 1s infinite;}
+.step-icon.done{background:rgba(76,175,125,.2);border-color:var(--green-dim);color:var(--green);}
+.step-icon.waiting{background:rgba(200,136,42,.15);border-color:rgba(200,136,42,.3);color:var(--amber);}
+.step-icon.failed{background:rgba(201,64,64,.15);border-color:var(--red-dim);color:var(--red);}
+.step-label{flex:1;color:var(--sheen);}
+.step-label.active{color:var(--bright);}
+.step-label.done{color:var(--sheen);text-decoration:none;}
+.step-countdown{font-family:var(--mono);font-size:10px;color:var(--amber);min-width:40px;text-align:right;}
+.loading-tip-box{border-top:1px solid var(--chrome-4);padding-top:12px;}
+.loading-tip-label{font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px;}
+.loading-tip-text{font-family:var(--sans);font-size:14px;color:var(--titanium);line-height:1.6;font-style:italic;transition:opacity .5s;}
+.loading-tip-text.fading{opacity:0;}
+
 /* ── SKELETON ── */
 .skeleton{pointer-events:none;min-height:90px;}
 .skel-line{height:10px;border-radius:3px;margin-bottom:9px;background:linear-gradient(90deg,var(--chrome-2) 25%,var(--chrome-3) 50%,var(--chrome-2) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;}
@@ -398,7 +419,10 @@ select option{background:var(--chrome-2);}
 
 <div class="main-content">
   <header>
-    <div class="logo">TaoScan</div>
+    <div class="logo-group">
+      <div class="logo">TaoScan</div>
+      <div class="tagline">The market speaks. Are you listening?</div>
+    </div>
     <div class="header-right">
       <button class="history-toggle" id="historyToggle" onclick="toggleSidebar()">☰</button>
       <div class="fx-display" id="fxDisplay">GBP/USD 1.2700</div>
@@ -447,7 +471,7 @@ select option{background:var(--chrome-2);}
           <option value="both">↕ Both</option>
         </select>
       </div>
-      <button class="scan-btn" id="scanBtn" onclick="runScan()" disabled>⏳ LOADING...</button>
+      <button class="scan-btn" id="scanBtn" onclick="runScan()">▶ SCAN</button>
     </div>
 
     <div class="cash-bar">
@@ -465,9 +489,18 @@ select option{background:var(--chrome-2);}
 
     <div class="status-bar">
       <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">Ready — loading market context...</span>
+      <span id="statusText">Ready — hit SCAN to begin</span>
     </div>
     <div id="errorMsg" class="error-msg" style="display:none;"></div>
+
+    <!-- LOADING TIPS PANEL -->
+    <div class="loading-panel" id="loadingPanel" style="display:none;">
+      <div class="loading-steps" id="loadingSteps"></div>
+      <div class="loading-tip-box">
+        <div class="loading-tip-label">💡 While you wait</div>
+        <div class="loading-tip-text" id="loadingTip"></div>
+      </div>
+    </div>
 
     <div id="resultsArea">
       <div class="empty-state">
@@ -832,79 +865,161 @@ function renderMacroPanel(macro){
   return`<div class="macro-panel" id="macroPanel"><div class="macro-header" onclick="toggleMacro()"><div class="macro-title-row"><span class="macro-title">Market Overview</span><div class="macro-overall"><span style="color:${uc}">${usIcon} US ${usBias}</span><span class="macro-ov-sep">·</span><span style="color:${ukc}">${ukIcon} UK ${ukBias}</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;"><div class="macro-filter-note">${macro.swing_filter||''}</div><span class="macro-toggle" id="macroToggleBtn">▼ Show detail</span></div></div><div class="macro-body" id="macroBody"><div class="macro-indices">${mkIdx('spy','$SPY',false)}${mkIdx('qqq','$QQQ',false)}${mkIdx('ftse','FTSE',true)}</div><div style="padding:8px 18px;font-family:var(--mono);font-size:10px;color:var(--sheen);border-top:1px solid var(--chrome-4);">⚠ Prices are AI estimates — always verify current prices before trading</div></div></div><div class="tier-divider"></div>`;
 }
 
-// ── MACRO PRELOAD ─────────────────────────────────────────────────────────────
-let cachedMacro=null,macroLoadedAt=null;
-async function preloadMacro(){
-  const btn = document.getElementById('scanBtn');
-  btn.disabled = true;
-  btn.textContent = '⏳ LOADING...';
-  try{
-    setStatus('Loading market context — please wait...', true);
-    cachedMacro = await getMacroContext();
-    macroLoadedAt = Date.now();
-    // Wait 15s after macro loads before allowing scan — lets TPM window reset
-    setStatus('Market context loaded — preparing scanner...', true);
-    await waitWithCountdown(15, 'Ready in');
-    setStatus('Ready — click SCAN', false);
-  } catch(e){
-    setStatus('Ready — click SCAN', false);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '▶ SCAN';
-  }
+// ── LOADING TIPS ENGINE ───────────────────────────────────────────────────────
+const TIPS = [
+  '"The best traders don\'t predict the market. They listen to it." — Eric Tao',
+  '"Volume confirms the move. Price without volume is just noise."',
+  '"A stop loss isn\'t admitting defeat — it\'s protecting your capital for the next trade."',
+  '"Never risk more than 2% of your portfolio on a single trade."',
+  '"The trend is your friend — until it bends."',
+  '"React to what the market is doing, not what you think it should do."',
+  '"Patience is a trading edge. Most people don\'t have it."',
+  '"The market doesn\'t care about your opinion. It only cares about price and volume."',
+  '"Cut losses short, let winners run. Simple to say, hard to do."',
+  '"Support and resistance are where the market has memory."',
+  '"In swing trading, missing a trade is always better than forcing one."',
+  '"Eric Tao knew: conviction without a stop loss is just hope."',
+  '"The best trade you ever make might be the one you don\'t take."',
+  '"Price action tells you everything. Everything else is just context."',
+  '"Breakouts without volume are traps. Volume is the market voting with money."',
+];
+
+let tipInterval = null;
+let tipIndex = 0;
+
+function startTips() {
+  const el = document.getElementById('loadingTip');
+  if(!el) return;
+  tipIndex = Math.floor(Math.random() * TIPS.length);
+  el.textContent = TIPS[tipIndex];
+  tipInterval = setInterval(() => {
+    el.classList.add('fading');
+    setTimeout(() => {
+      tipIndex = (tipIndex + 1) % TIPS.length;
+      el.textContent = TIPS[tipIndex];
+      el.classList.remove('fading');
+    }, 500);
+  }, 6000);
 }
-async function waitWithCountdown(seconds,label){
-  for(let s=seconds;s>0;s--){setStatus(`${label} — resuming in ${s}s...`,true);await new Promise(r=>setTimeout(r,1000));}
+
+function stopTips() {
+  if(tipInterval) { clearInterval(tipInterval); tipInterval = null; }
+}
+
+// Step definitions
+const SCAN_STEPS = [
+  { id: 'macro',  label: 'Reading market context (SPY, QQQ, FTSE)' },
+  { id: 'wait1',  label: 'Preparing large company scan' },
+  { id: 'large',  label: 'Scanning large companies (£50+ / $50+)' },
+  { id: 'wait2',  label: 'Preparing mid-size company scan' },
+  { id: 'mid',    label: 'Scanning mid-size companies (£10–49)' },
+  { id: 'wait3',  label: 'Preparing smaller company scan' },
+  { id: 'small',  label: 'Scanning smaller companies' },
+];
+
+function renderSteps(activeId, doneIds = [], waitId = null, countdown = null) {
+  const stepsEl = document.getElementById('loadingSteps');
+  if(!stepsEl) return;
+  stepsEl.innerHTML = SCAN_STEPS.map(step => {
+    let iconClass, icon, labelClass, cdText = '';
+    if(doneIds.includes(step.id))      { iconClass='done';    icon='✓'; labelClass='done'; }
+    else if(step.id === activeId)       { iconClass='active';  icon='●'; labelClass='active'; }
+    else if(step.id === waitId)         { iconClass='waiting'; icon='⏳'; labelClass='active'; cdText = countdown ? `${countdown}s` : ''; }
+    else                                { iconClass='pending'; icon='○'; labelClass=''; }
+    return `<div class="loading-step">
+      <div class="step-icon ${iconClass}">${icon}</div>
+      <span class="step-label ${labelClass}">${step.label}</span>
+      <span class="step-countdown">${cdText}</span>
+    </div>`;
+  }).join('');
+}
+
+let cachedMacro = null, macroLoadedAt = null;
+
+async function waitWithCountdown(seconds, waitStepId, doneIds) {
+  for(let s = seconds; s > 0; s--) {
+    renderSteps(null, doneIds, waitStepId, s);
+    setStatus(`Next scan in ${s}s...`, true);
+    await new Promise(r => setTimeout(r, 1000));
+  }
 }
 
 // ── MAIN SCAN ──────────────────────────────────────────────────────────────────
 async function runScan(){
-  if(viewingMode)backToLive();
-  const btn=document.getElementById('scanBtn');btn.disabled=true;btn.classList.add('loading');clearError();
-  const market=document.getElementById('marketSelect').value;const setup=document.getElementById('setupSelect').value;
-  const minRR=document.getElementById('rrSelect').value;const direction=document.getElementById('directionSelect').value;
-  const today=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const mPref=market==='best'?'Best market auto-selected.':market+' only';
-  const sFilt=setup==='all'?'Any pattern':setup+' only';const dirFilt=direction==='long'?'LONG only':direction==='short'?'SHORT only':'BOTH';
-  const sys=buildSysPrompt(minRR,direction);const scanDateKey=new Date().toISOString().slice(0,10);
+  if(viewingMode) backToLive();
+  const btn = document.getElementById('scanBtn');
+  btn.disabled = true; btn.classList.add('loading'); clearError();
 
-  document.getElementById('resultsArea').innerHTML=`
-    <div class="macro-panel macro-loading" id="macroPanel"><div class="macro-header"><div class="macro-title-row"><span class="macro-title">Market Overview</span><span style="font-family:var(--mono);font-size:11px;color:var(--sheen);">Loading...</span></div></div></div><div class="tier-divider"></div>
-    ${TIERS.map(tier=>`<div class="tier-section" id="tier-${tier.id}"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">${tier.label}</span><span class="tier-sublabel">${tier.sublabel}</span></div><div class="tier-status" id="ts-${tier.id}"><span class="tier-dot scanning"></span> Scanning...</div></div><div class="results-grid" id="grid-${tier.id}">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`).join('<div class="tier-divider"></div>')}`;
+  const market = document.getElementById('marketSelect').value;
+  const setup  = document.getElementById('setupSelect').value;
+  const minRR  = document.getElementById('rrSelect').value;
+  const direction = document.getElementById('directionSelect').value;
+  const today  = new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const mPref  = market==='best'?'Best market auto-selected.':market+' only';
+  const sFilt  = setup==='all'?'Any pattern':setup+' only';
+  const dirFilt = direction==='long'?'LONG only':direction==='short'?'SHORT only':'BOTH';
+  const sys    = buildSysPrompt(minRR, direction);
+  const scanDateKey = new Date().toISOString().slice(0,10);
 
-  setStatus('Step 1 — Analysing market...',true);
-  let macroData=null,macroCtx='';
-  try{
-    if(cachedMacro&&macroLoadedAt&&(Date.now()-macroLoadedAt)<600000){macroData=cachedMacro;}
-    else{macroData=await getMacroContext();cachedMacro=macroData;macroLoadedAt=Date.now();}
-    document.getElementById('macroPanel').outerHTML=renderMacroPanel(macroData);
-    macroCtx=`MACRO: SPY ${macroData.spy?.trend} bias=${macroData.spy?.macro_bias} S=$${macroData.spy?.key_support} R=$${macroData.spy?.key_resistance}. QQQ bias=${macroData.qqq?.macro_bias}. FTSE bias=${macroData.ftse?.macro_bias}. US:${macroData.overall_us_bias} UK:${macroData.overall_uk_bias}. ${macroData.swing_filter||''}`;
-  }catch(e){console.warn('Macro failed',e);}
+  // Show loading panel, hide results
+  document.getElementById('loadingPanel').style.display = 'block';
+  document.getElementById('resultsArea').innerHTML = '';
+  renderSteps('macro', []);
+  startTips();
 
-  setStatus('Step 2 — Scanning...',true);
-  let done=0;const collectedTiers=[];
-  for(let i=0;i<TIERS.length;i++){
-    if(i>0)await waitWithCountdown(20,`Tier ${i+1}/3 queued`);
-    const tier=TIERS[i];
-    const up=`${tier.label} swing trades. ${tier.constraint} Market:${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}. ${macroCtx} Return exactly 3 trades with S/R-based entries.`;
-    try{
-      const parsed=await callAPI(sys,up);
-      if(parsed?.trades)parsed.trades=evRankAndTrim(parsed.trades);
-      done++;setStatus(`Step 2 — ${done}/3 complete`,true);
-      renderTierLive(tier,parsed,null,scanDateKey);
-      collectedTiers.push({tierId:tier.id,tierLabel:tier.label,trades:parsed?.trades||null,error:null});
-    }catch(e){
-      done++;setStatus(`Step 2 — ${done}/3 complete`,true);
-      renderTierLive(tier,null,e.message,scanDateKey);
-      collectedTiers.push({tierId:tier.id,tierLabel:tier.label,trades:null,error:e.message});
+  // ── STEP 1: MACRO ──
+  setStatus('Analysing market context...', true);
+  let macroData = null, macroCtx = '';
+  try {
+    macroData = await getMacroContext();
+    cachedMacro = macroData; macroLoadedAt = Date.now();
+    macroCtx = `MACRO: SPY ${macroData.spy?.trend} bias=${macroData.spy?.macro_bias} S=$${macroData.spy?.key_support} R=$${macroData.spy?.key_resistance}. QQQ bias=${macroData.qqq?.macro_bias}. FTSE bias=${macroData.ftse?.macro_bias}. US:${macroData.overall_us_bias} UK:${macroData.overall_uk_bias}. ${macroData.swing_filter||''}`;
+  } catch(e) { console.warn('Macro failed', e); }
+
+  // Build results area now macro done
+  document.getElementById('resultsArea').innerHTML =
+    (macroData ? renderMacroPanel(macroData) : `<div class="macro-panel"><div class="macro-header"><div class="macro-title-row"><span class="macro-title">Market Overview</span><span style="font-family:var(--mono);font-size:11px;color:var(--sheen)">Unavailable</span></div></div></div>`) +
+    '<div class="tier-divider"></div>' +
+    TIERS.map(tier=>`<div class="tier-section" id="tier-${tier.id}"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">${tier.label}</span><span class="tier-sublabel">${tier.sublabel}</span></div><div class="tier-status" id="ts-${tier.id}"><span class="tier-dot"></span> Queued</div></div><div class="results-grid" id="grid-${tier.id}">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`).join('<div class="tier-divider"></div>');
+
+  const done = [];
+  const tierStepMap = [{tier: TIERS[0], stepId:'large', waitId:'wait1'}, {tier: TIERS[1], stepId:'mid', waitId:'wait2'}, {tier: TIERS[2], stepId:'small', waitId:'wait3'}];
+  const collectedTiers = [];
+
+  for(let i = 0; i < tierStepMap.length; i++) {
+    const { tier, stepId, waitId } = tierStepMap[i];
+
+    // Wait 20s before each tier
+    await waitWithCountdown(20, waitId, ['macro', ...done.map(d => tierStepMap.slice(0,done.length).map(x=>x.stepId)).flat()]);
+
+    // Mark tier as active
+    renderSteps(stepId, ['macro', ...done.map((_,j)=>tierStepMap[j].stepId)]);
+    const tsEl = document.getElementById(`ts-${tier.id}`);
+    if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Scanning...`;
+    setStatus(`Scanning ${tier.label}...`, true);
+
+    const up = `${tier.label} swing trades. ${tier.constraint} Market:${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}. ${macroCtx} Return exactly 3 trades with S/R-based entries.`;
+    try {
+      const parsed = await callAPI(sys, up);
+      if(parsed?.trades) parsed.trades = evRankAndTrim(parsed.trades);
+      renderTierLive(tier, parsed, null, scanDateKey);
+      collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:parsed?.trades||null, error:null});
+    } catch(e) {
+      renderTierLive(tier, null, e.message, scanDateKey);
+      collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:null, error:e.message});
     }
+    done.push(i);
+    renderSteps(null, ['macro', ...tierStepMap.slice(0, done.length).map(x=>x.stepId)]);
   }
 
-  const summary=collectedTiers.find(r=>r.trades?.length)?.trades?.[0]?.thesis||'';
-  setStatus('Scan complete',false);
-  const dl=direction==='long'?'↑ Long':direction==='short'?'↓ Short':'↕ Both';
-  persistScan(collectedTiers,summary,`${market==='best'?'Auto':market} · ${dl} · ${minRR}×`,macroData);
-  btn.disabled=false;btn.classList.remove('loading');
+  // Done
+  stopTips();
+  document.getElementById('loadingPanel').style.display = 'none';
+  setStatus('Scan complete', false);
+  const summary = collectedTiers.find(r=>r.trades?.length)?.trades?.[0]?.thesis || '';
+  const dl = direction==='long'?'↑ Long':direction==='short'?'↓ Short':'↕ Both';
+  persistScan(collectedTiers, summary, `${market==='best'?'Auto':market} · ${dl} · ${minRR}×`, macroData);
+  btn.disabled = false; btn.classList.remove('loading');
 }
 
 function renderTierLive(tier,parsed,error,scanDateKey){
@@ -1074,7 +1189,6 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
 // ── INIT ───────────────────────────────────────────────────────────────────────
 renderSidebar();
 renderPerformancePanel();
-preloadMacro();
 </script>
 </body>
 </html>
