@@ -784,7 +784,7 @@ const HIW_TRADER = [
 
 const HIW_LIMITATIONS_BEGINNER = 'One important thing to know: TaoScan is a starting point, not a guarantee. The AI learned from historical data and can\'t see what\'s happening right now in the market. Prices shown are from the previous session\'s close. Earnings warnings are based on available data but may not be complete. Always check the current price and do your own research before making any trade.';
 
-const HIW_LIMITATIONS_TRADER = 'Limitations: LLM analysis is bounded by training data cutoff — no live chart analysis or order flow. Volume scoring uses previous day data only (free tier). S/R levels are model-generated estimates. No earnings calendar integration beyond AI knowledge. Screener scoring is a simplified proxy for relative strength — no true RS calculation against benchmark.';
+const HIW_LIMITATIONS_TRADER = 'Limitations: LLM analysis is bounded by training data cutoff — no live chart analysis or order flow. Volume scoring uses previous day data only (free tier). S/R levels are model-generated estimates. Earnings flags sourced from Polygon financials API but may not be complete. Sector diversification uses a simplified letter-group proxy — no true GICS sector data on free tier. RS calculation vs SPY is single-day only, not multi-week.';
 
 let hiwOpen = false;
 function toggleHIW() {
@@ -1073,7 +1073,7 @@ async function callAPI(sys,usr){
       method: 'POST',
       signal: controller.signal,
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({system:sys, messages:[{role:'user', content:usr}], max_tokens:3000})
+      body: JSON.stringify({system:sys, messages:[{role:'user', content:usr}], max_tokens:4000})
     });
     clearTimeout(timeout);
     const data = await res.json();
@@ -1118,8 +1118,8 @@ function buildSysPrompt(minRR,direction){
   const learning=buildLearningContext();
   const dr=direction==='short'?'SHORT only. Entry near resistance, target support, stop above resistance.':direction==='both'?'BOTH long and short.':'LONG only. Buy near support, target resistance, stop below support.';
   return`Output ONLY raw JSON. No markdown, no prose.
-RULES: ${dr} S/R entries only. R:R>=${minRR}. US stocks only, prices in dollars 2dp. stop<buy<target longs. signals:3 max 3 words. sr_context:max 6 words. macro_alignment:aligned|neutral|divergent. additional_factors:max 2 items. thesis:max 6 words. sentiment_score:integer 0-100. win_rate 45-65%, sample 10-30.${learning}
-JSON:{"scan_summary":"max 6 words","trades":[{"rank":1,"ticker":"","company":"","exchange":"NYSE|NASDAQ","setup_type":"breakout|accumulation|momentum|breakdown|distribution","direction":"long|short","current_price":0,"buy_price":0,"target_price":0,"stop_price":0,"currency_symbol":"$","rr_ratio":0.0,"expected_days":0,"confidence_pct":0,"signals":["","",""],"additional_factors":[],"earnings_warning":false,"sentiment_score":0,"sentiment_label":"Positive|Neutral|Negative","backtest_win_rate":0,"backtest_sample":0,"backtest_avg_gain":0.0,"sr_context":"","macro_alignment":"aligned|neutral|divergent","key_support":0,"key_resistance":0,"thesis":"","liquidity_note":""}]}`;
+RULES: ${dr} S/R entries only. R:R>=${minRR}. US stocks, dollars 2dp. stop<buy<target longs. signals:3 max 2 words each. sr_context:max 5 words. macro_alignment:aligned|neutral|divergent. additional_factors:max 2. thesis:max 5 words. sentiment_score:integer 0-100. win_rate 45-65%, sample 10-30.${learning}
+JSON:{"scan_summary":"max 5 words","trades":[{"rank":1,"ticker":"","company":"","exchange":"NYSE|NASDAQ","setup_type":"breakout|accumulation|momentum|breakdown|distribution","direction":"long|short","current_price":0,"buy_price":0,"target_price":0,"stop_price":0,"currency_symbol":"$","rr_ratio":0.0,"expected_days":0,"confidence_pct":0,"signals":["","",""],"additional_factors":[],"earnings_warning":false,"sentiment_score":0,"sentiment_label":"Positive|Neutral|Negative","backtest_win_rate":0,"backtest_sample":0,"backtest_avg_gain":0.0,"sr_context":"","macro_alignment":"aligned|neutral|divergent","key_support":0,"key_resistance":0,"thesis":"","liquidity_note":""}]}`;
 }
 
 const TIERS=[
@@ -1365,14 +1365,14 @@ async function runScan(){
       // Improvement 5: Pass full OHLCV + RS + earnings + VWAP to AI
       const candidateList = screenData.candidates.map(c => {
         const parts = [
-          `${c.ticker}`,
-          `O=$${c.open} H=$${c.high} L=$${c.low} C=$${c.close}`,
-          `vol=${(c.volume/1000000).toFixed(1)}M`,
-          `chg=${c.change_pct}%`,
-          `RS_vs_SPY=${c.rs_vs_spy>=0?'+':''}${c.rs_vs_spy}%`,
-          c.above_vwap !== null ? (c.above_vwap ? 'above-VWAP' : 'below-VWAP') : '',
-          c.closed_near_high ? 'closed-near-high' : '',
-          c.earnings_soon ? '⚠EARNINGS-SOON' : '',  // Improvement 1
+          c.ticker,
+          `O${c.open} H${c.high} L${c.low} C${c.close}`,
+          `V${(c.volume/1000000).toFixed(1)}M`,
+          `chg${c.change_pct}%`,
+          `RS${c.rs_vs_spy>=0?'+':''}${c.rs_vs_spy}`,
+          c.above_vwap !== null ? (c.above_vwap ? 'abvVWAP' : 'blwVWAP') : '',
+          c.closed_near_high ? 'nearHigh' : '',
+          c.earnings_soon ? 'EARNINGS!' : '',
         ].filter(Boolean).join(' ');
         return parts;
       }).join('\n');
