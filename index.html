@@ -999,7 +999,7 @@ async function fetchScreenedStocks(tierId) {
     const res = await fetch(SCREEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tier: TIER_RANGES[tierId], limit: 15 })
+      body: JSON.stringify({ tier: TIER_RANGES[tierId], limit: 10 })
     });
     const data = await res.json();
     return data;
@@ -1074,7 +1074,7 @@ async function callAPI(sys,usr){
       method: 'POST',
       signal: controller.signal,
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({system:sys, messages:[{role:'user', content:usr}], max_tokens:4000})
+      body: JSON.stringify({system:sys, messages:[{role:'user', content:usr}], max_tokens:5000})
     });
     clearTimeout(timeout);
     const data = await res.json();
@@ -1378,9 +1378,9 @@ async function runScan(){
     const screenDate = largeScreen.date || midScreen.date || smallScreen.date || '';
     const spyChange = largeScreen.spy_change_pct || 0;
 
-    // Sort pooled candidates by score, take top 15
+    // Sort pooled candidates by score, take top 10 (fewer = less input tokens = more output room)
     allCandidates.sort((a,b) => b.score - a.score);
-    const top15 = allCandidates.slice(0, 15);
+    const top15 = allCandidates.slice(0, 10);
 
     if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Analysing best picks...`;
     setStatus('Finding the best 3 across all sizes...', true);
