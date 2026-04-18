@@ -379,7 +379,10 @@ select option{background:var(--chrome-2);}
 .empty-title{font-family:var(--sans);font-size:18px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--bright);margin-bottom:8px;}
 .empty-sub{font-family:var(--mono);font-size:11px;color:var(--sheen);line-height:1.8;}
 
-.disclaimer{margin-top:0;margin-bottom:14px;padding:12px 18px;border:1px solid var(--chrome-4);border-radius:6px;font-family:var(--mono);font-size:10px;color:var(--sheen);line-height:1.6;background:var(--chrome-1);}
+.disclaimer{margin-top:0;margin-bottom:14px;padding:14px 18px;border:1px solid var(--chrome-4);border-radius:6px;background:var(--chrome-1);}
+.disclaimer-price{font-family:var(--mono);font-size:12px;color:var(--titanium);line-height:1.6;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--chrome-4);}
+.disclaimer-price strong{color:var(--bright);}
+.disclaimer-legal{font-family:var(--mono);font-size:10px;color:var(--sheen);line-height:1.6;}
 
 .save-toast{position:fixed;bottom:22px;right:22px;z-index:400;font-family:var(--mono);font-size:12px;background:linear-gradient(135deg,var(--chrome-3),var(--chrome-4));color:var(--silver);border:1px solid var(--sheen);padding:10px 18px;border-radius:5px;transform:translateY(60px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.5);}
 .save-toast.show{transform:translateY(0);opacity:1;}
@@ -533,7 +536,10 @@ select option{background:var(--chrome-2);}
       <span class="cooldown-timer" id="cooldownTimer">5:00</span>
     </div>
 
-    <div class="disclaimer">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves risk of capital loss. Stock prices are sourced live from Twelve Data. <strong style="color:var(--amber);">S/R levels and trade analysis are AI-generated — always verify before entering any trade.</strong></div>
+    <div class="disclaimer">
+      <div class="disclaimer-price">📊 Prices shown are <strong>previous trading day's closing prices</strong> from Polygon.io. During market hours this is yesterday's close. After 9pm BST the current day's close may not yet be available. Always verify the current price before entering any trade.</div>
+      <div class="disclaimer-legal">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves significant risk of capital loss. S/R levels and trade analysis are AI-generated estimates.</div>
+    </div>
 
     <div class="status-bar">
       <div class="status-dot" id="statusDot"></div>
@@ -892,14 +898,13 @@ function refreshCashEstimates(){
 }
 
 // ── PRICE API ─────────────────────────────────────────────────────────────────
-const PRICES_URL  = PROXY_URL.replace(/\/$/, '') + '/prices';
-const SCREEN_URL  = PROXY_URL.replace(/\/$/, '') + '/screen';
+const SCREEN_URL = PROXY_URL.replace(/\/$/, '') + '/screen';
 
 // Tier price ranges for Polygon screener
 const TIER_RANGES = {
-  large: { minPrice: 50,  maxPrice: null, label: 'Large Companies ($50+)' },
-  mid:   { minPrice: 10,  maxPrice: 49.99, label: 'Mid-Size Companies ($10-$49)' },
-  small: { minPrice: 0.5, maxPrice: 9.99,  label: 'Smaller Companies (under $10)' },
+  large: { minPrice: 50,   maxPrice: null,  label: 'Large Companies ($50+)' },
+  mid:   { minPrice: 10,   maxPrice: 49.99, label: 'Mid-Size Companies ($10-$49)' },
+  small: { minPrice: 0.5,  maxPrice: 9.99,  label: 'Smaller Companies (under $10)' },
 };
 
 async function fetchScreenedStocks(tierId) {
@@ -917,65 +922,51 @@ async function fetchScreenedStocks(tierId) {
   }
 }
 
-// Twelve Data symbol format:
-// LSE: TICKER:LON (strip any .L suffix the AI adds)
-// US: TICKER only
-function toTwelveSymbol(ticker, exchange) {
-  const clean = ticker.replace(/\.(L|LON|LSE)$/i, '');
-  if (exchange === 'LSE') return clean + ':LON';
-  return clean;
-}
-
-async function fetchPrices(symbols) {
+// Fetch index prices from Polygon via /screen endpoint with a special flag
+async function fetchIndexPricesFromPolygon() {
   try {
-    const res = await fetch(PRICES_URL, {
+    const res = await fetch(SCREEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ symbols })
+      body: JSON.stringify({ indices: true })
     });
     const data = await res.json();
     return data.prices || {};
   } catch(e) {
-    console.warn('Price fetch failed:', e);
+    console.warn('Index price fetch failed:', e);
     return {};
   }
 }
 
-async function fetchIndexPrices() {
-  return fetchPrices(['SPY', 'QQQ']);
-}
-
-async function enrichWithRealPrices(trades) {
+// Enrich AI-recommended trades with real prices from Polygon screener data
+// screenCandidates is the array already fetched for this tier
+function enrichTradesFromScreener(trades, screenCandidates, screenDate) {
   if (!trades || !trades.length) return trades;
-  const symbols = trades.map(t => toTwelveSymbol(t.ticker, t.exchange));
-  const prices = await fetchPrices(symbols);
   return trades.map(t => {
-    const sym = toTwelveSymbol(t.ticker, t.exchange);
-    const entry = prices[sym];
-    const realPrice = entry?.price;
-    const priceTime = entry?.datetime || null;
-    const isLSE = t.exchange === 'LSE';
-
-    if (realPrice && realPrice > 0) {
-      const ratio = realPrice / t.current_price;
+    // Find matching candidate by ticker
+    const match = screenCandidates.find(c =>
+      c.ticker.toUpperCase() === t.ticker.toUpperCase().replace(/\.(L|LON)$/i, '')
+    );
+    if (match && match.close && match.close > 0) {
+      const ratio = match.close / t.current_price;
       return {
         ...t,
-        current_price: realPrice,
-        price_datetime: priceTime,
-        buy_price: isFinite(ratio) && ratio > 0 ? Math.round(t.buy_price * ratio * 100) / 100 : t.buy_price,
+        current_price: match.close,
+        price_datetime: screenDate || null,
+        volume: match.volume || null,
+        volume_ratio: match.volume ? (match.volume / 1000000).toFixed(1) + 'M' : null,
+        change_pct: match.change_pct || null,
+        closed_near_high: match.closed_near_high || false,
+        buy_price:    isFinite(ratio) && ratio > 0 ? Math.round(t.buy_price    * ratio * 100) / 100 : t.buy_price,
         target_price: isFinite(ratio) && ratio > 0 ? Math.round(t.target_price * ratio * 100) / 100 : t.target_price,
-        stop_price: isFinite(ratio) && ratio > 0 ? Math.round(t.stop_price * ratio * 100) / 100 : t.stop_price,
-        key_support: isFinite(ratio) && ratio > 0 ? Math.round(t.key_support * ratio * 100) / 100 : t.key_support,
+        stop_price:   isFinite(ratio) && ratio > 0 ? Math.round(t.stop_price   * ratio * 100) / 100 : t.stop_price,
+        key_support:  isFinite(ratio) && ratio > 0 ? Math.round(t.key_support  * ratio * 100) / 100 : t.key_support,
         key_resistance: isFinite(ratio) && ratio > 0 ? Math.round(t.key_resistance * ratio * 100) / 100 : t.key_resistance,
         price_updated: true,
+        price_source: 'polygon',
       };
     }
-    // No live price available
-    return {
-      ...t,
-      price_updated: false,
-      price_unavailable: 'Live price unavailable — verify before trading',
-    };
+    return { ...t, price_updated: false };
   });
 }
 
@@ -1023,16 +1014,14 @@ const MACRO_SYS=`Output ONLY raw JSON. No markdown, no prose.
 {"spy":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"qqq":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"overall_us_bias":"bullish|neutral|bearish","swing_filter":"max 10 words"}`;
 
 async function getMacroContext(){
-  // Fetch real index prices first
-  const indexPrices = await fetchPrices(['SPY', 'QQQ']);
-  const spyPrice = indexPrices['SPY']?.price ? `SPY current price: $${indexPrices['SPY'].price.toFixed(2)}.` : '';
-  const qqqPrice = indexPrices['QQQ']?.price ? `QQQ current price: $${indexPrices['QQQ'].price.toFixed(2)}.` : '';
+  const indexPrices = await fetchIndexPricesFromPolygon();
+  const spyPrice = indexPrices['SPY'] ? `SPY previous close: $${parseFloat(indexPrices['SPY']).toFixed(2)}.` : '';
+  const qqqPrice = indexPrices['QQQ'] ? `QQQ previous close: $${parseFloat(indexPrices['QQQ']).toFixed(2)}.` : '';
   const realPriceContext = [spyPrice, qqqPrice].filter(Boolean).join(' ');
-
-  const macroResult = await callAPI(MACRO_SYS,`Current macro context for US swing trading. ${realPriceContext} Analyse SPY and QQQ S/R levels relative to these REAL current prices, trend, bias. Date:${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}.`);
+  const macroResult = await callAPI(MACRO_SYS,`Current macro context for US swing trading. ${realPriceContext} Analyse SPY and QQQ S/R levels relative to these previous close prices, trend, bias. Date:${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}.`);
   if(macroResult) {
-    if(macroResult.spy) macroResult.spy.price_datetime = indexPrices['SPY']?.datetime || null;
-    if(macroResult.qqq) macroResult.qqq.price_datetime = indexPrices['QQQ']?.datetime || null;
+    if(macroResult.spy) macroResult.spy.price_datetime = 'prev close';
+    if(macroResult.qqq) macroResult.qqq.price_datetime = 'prev close';
   }
   return macroResult;
 }
@@ -1300,8 +1289,8 @@ async function runScan(){
       const parsed = await callAPI(sys, up);
       if(parsed?.trades) {
         parsed.trades = evRankAndTrim(parsed.trades);
-        setStatus(`Updating ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()} with real prices...`, true);
-        parsed.trades = await enrichWithRealPrices(parsed.trades);
+        // Enrich with Polygon prices already in screener data — no extra API call
+        parsed.trades = enrichTradesFromScreener(parsed.trades, screenData.candidates || [], screenData.date || '');
       }
       renderTierLive(tier, parsed, null, scanDateKey);
       collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:parsed?.trades||null, error:null});
@@ -1492,8 +1481,8 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
           <div class="level-value">${c}${t.stop_price}</div>
         </div>
       </div>
-      <div style="font-family:var(--mono);font-size:9px;margin:-6px 0 10px;padding:0 2px;color:${t.price_updated?'var(--green)':t.price_unavailable?'var(--amber)':'var(--sheen)'};">
-        ${t.price_updated ? `✓ Live price (as at ${t.price_datetime})` : t.price_unavailable ? `⚠ ${t.price_unavailable}` : '⚠ AI estimate — verify before trading'}
+      <div style="font-family:var(--mono);font-size:9px;margin:-6px 0 10px;padding:0 2px;color:${t.price_updated?'var(--green)':'var(--sheen)'};">
+        ${t.price_updated ? `📊 Prev session close${t.price_datetime ? ' · ' + t.price_datetime : ''} · Polygon.io` : '⚠ AI estimate — verify before trading'}
       </div>
 
       <div class="cash-estimate">
