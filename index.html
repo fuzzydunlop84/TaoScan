@@ -907,13 +907,28 @@ function parseJSON(raw){
   if(end>0)s=s.slice(0,end+1);return JSON.parse(s);
 }
 async function callAPI(sys,usr){
-  const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:[{role:'user',content:usr}],max_tokens:3000})});
-  const data=await res.json();
-  if(!res.ok){
-    const msg = typeof data.error==='string' ? data.error : data.error?.message || 'API error';
-    throw new Error(msg);
+  // 35 second frontend timeout — prevents hanging if worker doesn't respond
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 35000);
+  try {
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({system:sys, messages:[{role:'user', content:usr}], max_tokens:3000})
+    });
+    clearTimeout(timeout);
+    const data = await res.json();
+    if(!res.ok) {
+      const msg = typeof data.error==='string' ? data.error : data.error?.message || 'API error';
+      throw new Error(msg);
+    }
+    return parseJSON(data.content.map(b=>b.text||'').join(''));
+  } catch(e) {
+    clearTimeout(timeout);
+    if(e.name === 'AbortError') throw new Error('Request timed out — all models may be at capacity');
+    throw e;
   }
-  return parseJSON(data.content.map(b=>b.text||'').join(''));
 }
 
 // ── EV ─────────────────────────────────────────────────────────────────────────
@@ -1151,7 +1166,7 @@ async function runScan(){
   } catch(e) {
     console.warn('Macro failed', e);
     // Check if it's a rate limit / daily limit error
-    if(e.message && (e.message.includes('capacity') || e.message.includes('rate') || e.message.includes('limit'))) {
+    if(e.message && (e.message.includes('capacity') || e.message.includes('rate') || e.message.includes('limit') || e.message.includes('timed out'))) {
       stopTips();
       document.getElementById('loadingPanel').style.display = 'none';
       showError('AI models are at their daily limit. Please try again after midnight UTC (1am BST). The limit resets daily.');
