@@ -967,11 +967,17 @@ function confirmClearTrades(){if(confirm('Delete all trade log entries?')){local
 function toGBP(a,c){return c==='USD'?a/GBP_USD:a;}
 function toUSD(a,c){return c==='GBP'?a*GBP_USD:a;}
 function calcCashPnL(t,ca,cc){
-  const c=t.currency_symbol||'£',sc=c==='£'?'GBP':'USD';
-  const cashIn=sc==='GBP'?toGBP(ca,cc):toUSD(ca,cc);
-  const shares=cashIn/t.buy_price;
-  const gSC=shares*(t.target_price-t.buy_price),lSC=shares*(t.buy_price-t.stop_price);
-  return{gainGBP:sc==='GBP'?gSC:gSC/GBP_USD,gainUSD:sc==='USD'?gSC:gSC*GBP_USD,lossGBP:sc==='GBP'?lSC:lSC/GBP_USD,lossUSD:sc==='USD'?lSC:lSC*GBP_USD};
+  // All stocks are US (USD) — convert user's cash to USD, calc shares, convert back
+  const cashUSD = toUSD(ca, cc);
+  const shares = cashUSD / t.buy_price;
+  const gainUSD = shares * (t.target_price - t.buy_price);
+  const lossUSD = shares * (t.buy_price - t.stop_price);
+  return {
+    gainGBP: gainUSD / GBP_USD,
+    gainUSD,
+    lossGBP: lossUSD / GBP_USD,
+    lossUSD,
+  };
 }
 function fmt(n,ccy){return(ccy==='GBP'?'£':'$')+Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});}
 function refreshCashEstimates(){
