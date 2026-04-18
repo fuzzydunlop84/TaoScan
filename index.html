@@ -1643,7 +1643,7 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
       <div class="stock-info">
         <div class="ticker">${t.ticker}</div>
         <div class="company-name">${t.company}</div>
-        <div class="exchange-tag">${t.exchange} · ${c}${t.current_price}</div>
+        <div class="exchange-tag">${t.exchange} · ${c}${parseFloat(t.current_price).toFixed(2)}</div>
         ${volBadge}
         ${rsBadge}
       </div>
@@ -1664,15 +1664,15 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
       <div class="price-levels">
         <div class="level-box buy">
           <div class="level-label">${isShort?'Sell at':'Buy at'}</div>
-          <div class="level-value">${c}${t.buy_price}</div>
+          <div class="level-value">${c}${parseFloat(t.buy_price).toFixed(2)}</div>
         </div>
         <div class="level-box target">
           <div class="level-label">Take profit</div>
-          <div class="level-value">${c}${t.target_price}</div>
+          <div class="level-value">${c}${parseFloat(t.target_price).toFixed(2)}</div>
         </div>
         <div class="level-box stop">
           <div class="level-label" style="cursor:pointer" onclick="showTooltip('stop')">Get out if ℹ</div>
-          <div class="level-value">${c}${t.stop_price}</div>
+          <div class="level-value">${c}${parseFloat(t.stop_price).toFixed(2)}</div>
         </div>
       </div>
       <div style="font-family:var(--mono);font-size:9px;margin:-6px 0 10px;padding:0 2px;color:${t.price_updated?'var(--green)':'var(--sheen)'};">
