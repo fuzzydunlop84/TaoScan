@@ -318,8 +318,8 @@ select option{background:var(--chrome-2);}
 .tier-select-panel::-webkit-scrollbar{display:none;}
 .tier-check{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 12px;border-radius:5px;border:1px solid var(--chrome-4);background:var(--chrome-2);transition:border-color .2s,background .2s;user-select:none;}
 .tier-check:hover{border-color:var(--edge);}
-.tier-check input[type="checkbox"]{width:15px;height:15px;accent-color:var(--green);cursor:pointer;flex-shrink:0;}
-.tier-check input[type="checkbox"]:checked~.tier-check-label{color:var(--bright);}
+.tier-check input[type="checkbox"],.tier-check input[type="radio"]{width:15px;height:15px;accent-color:var(--green);cursor:pointer;flex-shrink:0;}
+.tier-check input[type="checkbox"]:checked~.tier-check-label,.tier-check input[type="radio"]:checked~.tier-check-label{color:var(--bright);}
 .tier-check:has(input:checked){border-color:var(--steel);background:rgba(122,143,166,.08);}
 .tier-check-label{font-family:var(--mono);font-size:11px;color:var(--sheen);display:flex;align-items:center;gap:6px;}
 .tier-check-sub{font-size:9px;color:var(--sheen);opacity:.7;}
@@ -541,10 +541,10 @@ select option{background:var(--chrome-2);}
       </div>
       <div style="flex-basis:100%;height:1px;background:var(--chrome-4);margin:4px 0;"></div>
       <div class="tier-select-panel" style="margin-bottom:0;border:none;background:none;padding:0;flex:1;min-width:0;">
-        <span class="ctrl-label" style="flex-shrink:0;">Scan Tiers</span>
-        <label class="tier-check"><input type="checkbox" id="tierLarge"> <span class="tier-check-label">Large Companies</span></label>
-        <label class="tier-check"><input type="checkbox" id="tierMid"> <span class="tier-check-label">Mid-Size</span></label>
-        <label class="tier-check"><input type="checkbox" id="tierSmall"> <span class="tier-check-label">Smaller Companies</span></label>
+        <span class="ctrl-label" style="flex-shrink:0;">Company Size</span>
+        <label class="tier-check"><input type="radio" name="tierSelect" id="tierLarge"> <span class="tier-check-label">Large Companies</span></label>
+        <label class="tier-check"><input type="radio" name="tierSelect" id="tierMid" checked> <span class="tier-check-label">Mid-Size</span></label>
+        <label class="tier-check"><input type="radio" name="tierSelect" id="tierSmall"> <span class="tier-check-label">Smaller Companies</span></label>
       </div>
       <button class="scan-btn" id="scanBtn" onclick="runScan()">▶ SCAN</button>
     </div>
@@ -1264,7 +1264,7 @@ function startCooldown() {
 async function runScan(){
   if(viewingMode) backToLive();
 
-  // Validate tier selection
+  // Get selected tier from radio buttons
   const largeTicked = document.getElementById('tierLarge').checked;
   const midTicked   = document.getElementById('tierMid').checked;
   const smallTicked = document.getElementById('tierSmall').checked;
@@ -1275,7 +1275,7 @@ async function runScan(){
   );
 
   if(selectedTiers.length === 0) {
-    showError('Please select at least one tier to scan (Large, Mid-Size or Smaller companies).');
+    showError('Please select a company size to scan.');
     return;
   }
 
