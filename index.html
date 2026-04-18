@@ -1126,11 +1126,11 @@ async function runScan(){
   const btn = document.getElementById('scanBtn');
   btn.disabled = true; btn.classList.add('loading'); clearError();
 
-  const market = document.getElementById('marketSelect').value;
   const setup  = document.getElementById('setupSelect').value;
   const minRR  = document.getElementById('rrSelect').value;
   const direction = document.getElementById('directionSelect').value;
   const today  = new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const market = 'best';
   const mPref = 'US stocks only (NYSE/NASDAQ).';
   const sFilt  = setup==='all'?'Any pattern':setup+' only';
   const dirFilt = direction==='long'?'LONG only':direction==='short'?'SHORT only':'BOTH';
