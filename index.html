@@ -316,12 +316,12 @@ select option{background:var(--chrome-2);}
 /* ── TIER CHECKBOXES ── */
 .tier-select-panel{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:6px;margin-bottom:14px;flex-wrap:nowrap;overflow-x:auto;}
 .tier-select-panel::-webkit-scrollbar{display:none;}
-.tier-check{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 12px;border-radius:5px;border:1px solid var(--chrome-4);background:var(--chrome-2);transition:border-color .2s,background .2s;user-select:none;}
+.tier-check{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 12px;border-radius:5px;border:1px solid var(--chrome-4);background:var(--chrome-2);transition:border-color .2s,background .2s;user-select:none;flex:1;justify-content:center;}
 .tier-check:hover{border-color:var(--edge);}
 .tier-check input[type="checkbox"],.tier-check input[type="radio"]{width:15px;height:15px;accent-color:var(--green);cursor:pointer;flex-shrink:0;}
 .tier-check input[type="checkbox"]:checked~.tier-check-label,.tier-check input[type="radio"]:checked~.tier-check-label{color:var(--bright);}
 .tier-check:has(input:checked){border-color:var(--steel);background:rgba(122,143,166,.08);}
-.tier-check-label{font-family:var(--mono);font-size:11px;color:var(--sheen);display:flex;align-items:center;gap:6px;}
+.tier-check-label{font-family:var(--mono);font-size:11px;color:var(--sheen);display:flex;align-items:center;gap:6px;white-space:nowrap;}
 .tier-check-sub{font-size:9px;color:var(--sheen);opacity:.7;}
 
 /* ── COOLDOWN BAR ── */
@@ -542,8 +542,9 @@ select option{background:var(--chrome-2);}
       <div style="flex-basis:100%;height:1px;background:var(--chrome-4);margin:4px 0;"></div>
       <div class="tier-select-panel" style="margin-bottom:0;border:none;background:none;padding:0;flex:1;min-width:0;">
         <span class="ctrl-label" style="flex-shrink:0;">Company Size</span>
+        <label class="tier-check"><input type="radio" name="tierSelect" id="tierAny" checked> <span class="tier-check-label">Any</span></label>
         <label class="tier-check"><input type="radio" name="tierSelect" id="tierLarge"> <span class="tier-check-label">Large Companies</span></label>
-        <label class="tier-check"><input type="radio" name="tierSelect" id="tierMid" checked> <span class="tier-check-label">Mid-Size</span></label>
+        <label class="tier-check"><input type="radio" name="tierSelect" id="tierMid"> <span class="tier-check-label">Mid-Size</span></label>
         <label class="tier-check"><input type="radio" name="tierSelect" id="tierSmall"> <span class="tier-check-label">Smaller Companies</span></label>
       </div>
       <button class="scan-btn" id="scanBtn" onclick="runScan()">▶ SCAN</button>
@@ -1265,14 +1266,16 @@ async function runScan(){
   if(viewingMode) backToLive();
 
   // Get selected tier from radio buttons
+  const anyTicked   = document.getElementById('tierAny').checked;
   const largeTicked = document.getElementById('tierLarge').checked;
   const midTicked   = document.getElementById('tierMid').checked;
   const smallTicked = document.getElementById('tierSmall').checked;
-  const selectedTiers = TIERS.filter(t =>
+  const selectedTiers = anyTicked ? [...TIERS] : TIERS.filter(t =>
     (t.id === 'large' && largeTicked) ||
     (t.id === 'mid'   && midTicked)   ||
     (t.id === 'small' && smallTicked)
   );
+  const isAnyMode = anyTicked;
 
   if(selectedTiers.length === 0) {
     showError('Please select a company size to scan.');
@@ -1295,10 +1298,15 @@ async function runScan(){
 
   // Build dynamic step list based on selected tiers
   const dynamicSteps = [{ id: 'macro', label: 'Reading US market context (SPY, QQQ)' }];
-  selectedTiers.forEach((tier, i) => {
-    dynamicSteps.push({ id: `wait${i+1}`, label: `Preparing ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()} scan` });
-    dynamicSteps.push({ id: tier.id, label: `Scanning ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()}` });
-  });
+  if(isAnyMode) {
+    dynamicSteps.push({ id: 'wait1', label: 'Preparing screen across all sizes' });
+    dynamicSteps.push({ id: 'any',   label: 'Screening + finding best 3 trades' });
+  } else {
+    selectedTiers.forEach((tier, i) => {
+      dynamicSteps.push({ id: `wait${i+1}`, label: `Preparing ${tier.label} screen` });
+      dynamicSteps.push({ id: tier.id, label: `Screening + analysing ${tier.label}` });
+    });
+  }
 
   // Show loading panel
   document.getElementById('loadingPanel').style.display = 'block';
@@ -1337,72 +1345,137 @@ async function runScan(){
   document.getElementById('resultsArea').innerHTML =
     (macroData ? renderMacroPanel(macroData) : `<div class="macro-panel"><div class="macro-header"><div class="macro-title-row"><span class="macro-title">Market Overview</span><span style="font-family:var(--mono);font-size:11px;color:var(--sheen)">Unavailable</span></div></div></div>`) +
     '<div class="tier-divider"></div>' +
-    selectedTiers.map(tier=>`<div class="tier-section" id="tier-${tier.id}"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">${tier.label}</span><span class="tier-sublabel">${tier.sublabel}</span></div><div class="tier-status" id="ts-${tier.id}"><span class="tier-dot"></span> Queued</div></div><div class="results-grid" id="grid-${tier.id}">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`).join('<div class="tier-divider"></div>');
+    (isAnyMode
+      ? `<div class="tier-section" id="tier-any"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">Best Opportunities</span><span class="tier-sublabel">Top 3 across all company sizes</span></div><div class="tier-status" id="ts-any"><span class="tier-dot"></span> Queued</div></div><div class="results-grid" id="grid-any">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`
+      : selectedTiers.map(tier=>`<div class="tier-section" id="tier-${tier.id}"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">${tier.label}</span><span class="tier-sublabel">${tier.sublabel}</span></div><div class="tier-status" id="ts-${tier.id}"><span class="tier-dot"></span> Queued</div></div><div class="results-grid" id="grid-${tier.id}">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`).join('<div class="tier-divider"></div>')
+    );
 
   const done = [];
   const collectedTiers = [];
 
-  for(let i = 0; i < selectedTiers.length; i++) {
-    const tier = selectedTiers[i];
-    const waitId = `wait${i+1}`;
+  if(isAnyMode) {
+    // ── ANY MODE: screen all tiers, pool candidates, single AI call ──────────
+    const tsEl = document.getElementById('ts-any');
 
-    // 20s wait before each tier
-    await waitWithCountdown(20, waitId, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
+    // Wait before screening
+    await waitWithCountdown(20, 'wait1', ['macro']);
+    if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Screening all sizes...`;
+    setStatus('Screening all company sizes...', true);
 
-    renderSteps(tier.id, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
-    const tsEl = document.getElementById(`ts-${tier.id}`);
-    if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Screening...`;
-    setStatus(`Screening ${tier.label} with real market data...`, true);
+    // Screen all 3 tiers in parallel (Polygon calls, not AI)
+    const [largeScreen, midScreen, smallScreen] = await Promise.all([
+      fetchScreenedStocks('large'),
+      fetchScreenedStocks('mid'),
+      fetchScreenedStocks('small'),
+    ]);
 
-    // Step A — Screen with Polygon for real candidates
-    let screenCtx = '';
-    let screenDate = '';
-    const screenData = await fetchScreenedStocks(tier.id);
-    if(screenData.candidates && screenData.candidates.length > 0) {
-      screenDate = screenData.date || '';
-      const spyChange = screenData.spy_change_pct || 0;
+    // Pool all candidates with tier label attached
+    const allCandidates = [
+      ...(largeScreen.candidates||[]).map(c=>({...c, tierLabel:'Large'})),
+      ...(midScreen.candidates||[]).map(c=>({...c, tierLabel:'Mid-Size'})),
+      ...(smallScreen.candidates||[]).map(c=>({...c, tierLabel:'Smaller'})),
+    ];
+    const screenDate = largeScreen.date || midScreen.date || smallScreen.date || '';
+    const spyChange = largeScreen.spy_change_pct || 0;
 
-      // Improvement 5: Pass full OHLCV + RS + earnings + VWAP to AI
-      const candidateList = screenData.candidates.map(c => {
-        const parts = [
-          c.ticker,
-          `O${c.open} H${c.high} L${c.low} C${c.close}`,
-          `V${(c.volume/1000000).toFixed(1)}M`,
-          `chg${c.change_pct}%`,
-          `RS${c.rs_vs_spy>=0?'+':''}${c.rs_vs_spy}`,
-          c.above_vwap !== null ? (c.above_vwap ? 'abvVWAP' : 'blwVWAP') : '',
-          c.closed_near_high ? 'nearHigh' : '',
-          c.earnings_soon ? 'EARNINGS!' : '',
-        ].filter(Boolean).join(' ');
-        return parts;
-      }).join('\n');
+    // Sort pooled candidates by score, take top 15
+    allCandidates.sort((a,b) => b.score - a.score);
+    const top15 = allCandidates.slice(0, 15);
 
-      screenCtx = `\nREAL MARKET DATA from ${screenDate}. SPY change: ${spyChange>=0?'+':''}${spyChange}% (use for relative strength context).\nAnalyse ONLY these pre-screened stocks with their actual OHLCV data:\n${candidateList}\n\nFor each candidate: use the real O/H/L/C to identify S/R levels, assess pattern quality, check RS vs SPY. Flag ⚠EARNINGS-SOON stocks as higher risk. Pick the 3 best setups from this list only.`;
+    if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Analysing best picks...`;
+    setStatus('Finding the best 3 across all sizes...', true);
 
-      if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Analysing...`;
-      setStatus(`Analysing ${tier.label} candidates...`, true);
-    } else {
-      screenCtx = '\nNo screener data available — use your training knowledge to identify candidates.';
-      if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Scanning...`;
-      setStatus(`Scanning ${tier.label}...`, true);
-    }
+    const candidateList = top15.map(c => {
+      const parts = [
+        c.ticker,
+        `[${c.tierLabel}]`,
+        `O${c.open} H${c.high} L${c.low} C${c.close}`,
+        `V${(c.volume/1000000).toFixed(1)}M`,
+        `chg${c.change_pct}%`,
+        `RS${c.rs_vs_spy>=0?'+':''}${c.rs_vs_spy}`,
+        c.above_vwap !== null ? (c.above_vwap ? 'abvVWAP' : 'blwVWAP') : '',
+        c.closed_near_high ? 'nearHigh' : '',
+        c.earnings_soon ? 'EARNINGS!' : '',
+      ].filter(Boolean).join(' ');
+      return parts;
+    }).join('\n');
 
-    const up = `${tier.label} swing trades. ${tier.constraint} Market:${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}.${screenCtx}\n${macroCtx}\nReturn exactly 3 trades with S/R-based entries.`;
+    const screenCtx = `\nREAL MARKET DATA from ${screenDate}. SPY change: ${spyChange>=0?'+':''}${spyChange}%.\nTop candidates across ALL company sizes:\n${candidateList}\n\nPick the 3 best swing trade setups from this list. Mix of sizes is fine. Use OHLCV to identify S/R levels and pattern quality.`;
+
+    const up = `Best swing trades across all company sizes. ${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}.${screenCtx}\n${macroCtx}\nReturn exactly 3 trades — the absolute best setups available today regardless of company size.`;
+
     try {
       const parsed = await callAPI(sys, up);
       if(parsed?.trades) {
         parsed.trades = evRankAndTrim(parsed.trades);
-        // Enrich with Polygon prices already in screener data — no extra API call
-        parsed.trades = enrichTradesFromScreener(parsed.trades, screenData.candidates || [], screenData.date || '');
+        parsed.trades = enrichTradesFromScreener(parsed.trades, allCandidates, screenDate);
       }
-      renderTierLive(tier, parsed, null, scanDateKey);
-      collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:parsed?.trades||null, error:null});
+      const anyTier = {id:'any', label:'Best Opportunities', sublabel:'Top 3 across all sizes', liquidityNote:false};
+      renderTierLive(anyTier, parsed, null, scanDateKey);
+      collectedTiers.push({tierId:'any', tierLabel:'Best Opportunities', trades:parsed?.trades||null, error:null});
     } catch(e) {
-      renderTierLive(tier, null, e.message, scanDateKey);
-      collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:null, error:e.message});
+      if(tsEl) tsEl.innerHTML = `<span class="tier-dot failed"></span> Failed`;
+      document.getElementById('grid-any').innerHTML = `<div class="tier-error">⚠ ${e.message}</div>`;
+      collectedTiers.push({tierId:'any', tierLabel:'Best Opportunities', trades:null, error:e.message});
     }
-    done.push(i);
-    renderSteps(null, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
+
+  } else {
+    // ── SINGLE TIER MODE ─────────────────────────────────────────────────────
+    for(let i = 0; i < selectedTiers.length; i++) {
+      const tier = selectedTiers[i];
+      const waitId = `wait${i+1}`;
+
+      await waitWithCountdown(20, waitId, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
+
+      renderSteps(tier.id, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
+      const tsEl = document.getElementById(`ts-${tier.id}`);
+      if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Screening...`;
+      setStatus(`Screening ${tier.label} with real market data...`, true);
+
+      let screenCtx = '';
+      let screenDate = '';
+      const screenData = await fetchScreenedStocks(tier.id);
+      if(screenData.candidates && screenData.candidates.length > 0) {
+        screenDate = screenData.date || '';
+        const spyChange = screenData.spy_change_pct || 0;
+        const candidateList = screenData.candidates.map(c => {
+          const parts = [
+            c.ticker,
+            `O${c.open} H${c.high} L${c.low} C${c.close}`,
+            `V${(c.volume/1000000).toFixed(1)}M`,
+            `chg${c.change_pct}%`,
+            `RS${c.rs_vs_spy>=0?'+':''}${c.rs_vs_spy}`,
+            c.above_vwap !== null ? (c.above_vwap ? 'abvVWAP' : 'blwVWAP') : '',
+            c.closed_near_high ? 'nearHigh' : '',
+            c.earnings_soon ? 'EARNINGS!' : '',
+          ].filter(Boolean).join(' ');
+          return parts;
+        }).join('\n');
+        screenCtx = `\nREAL MARKET DATA from ${screenDate}. SPY change: ${spyChange>=0?'+':''}${spyChange}%.\nAnalyse ONLY these pre-screened stocks:\n${candidateList}\n\nUse real OHLCV to identify S/R levels. Pick the 3 best setups.`;
+        if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Analysing...`;
+        setStatus(`Analysing ${tier.label} candidates...`, true);
+      } else {
+        screenCtx = '\nNo screener data available — use your training knowledge.';
+        if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Scanning...`;
+        setStatus(`Scanning ${tier.label}...`, true);
+      }
+
+      const up = `${tier.label} swing trades. ${tier.constraint} Market:${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}.${screenCtx}\n${macroCtx}\nReturn exactly 3 trades with S/R-based entries.`;
+      try {
+        const parsed = await callAPI(sys, up);
+        if(parsed?.trades) {
+          parsed.trades = evRankAndTrim(parsed.trades);
+          parsed.trades = enrichTradesFromScreener(parsed.trades, screenData.candidates || [], screenData.date || '');
+        }
+        renderTierLive(tier, parsed, null, scanDateKey);
+        collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:parsed?.trades||null, error:null});
+      } catch(e) {
+        renderTierLive(tier, null, e.message, scanDateKey);
+        collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:null, error:e.message});
+      }
+      done.push(i);
+      renderSteps(null, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
+    }
   }
 
   // Done
