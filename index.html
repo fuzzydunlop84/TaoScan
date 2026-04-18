@@ -457,7 +457,6 @@ select option{background:var(--chrome-2);}
     </div>
     <div class="header-right">
       <button class="history-toggle" id="historyToggle" onclick="toggleSidebar()">☰</button>
-      <div class="fx-display" id="fxDisplay">USD</div>
       <div class="live-pill"><div class="live-dot"></div>LIVE</div>
       <div class="time-display" id="clock">--:--:--</div>
     </div>
@@ -474,16 +473,12 @@ select option{background:var(--chrome-2);}
     </div>
 
     <div class="cash-bar">
-      <span class="cash-bar-label">Currency</span>
-      <span class="fx-rate-text" id="fxRateDisplay">USD</span>
-      <div class="cash-input-group">
-        <span class="cash-bar-label">Cash per trade</span>
-        <input class="cash-input" id="cashInput" type="number" value="1000" min="1" oninput="refreshCashEstimates()">
-        <select id="cashCurrency" class="cash-input" style="width:64px;" onchange="refreshCashEstimates()">
-          <option value="GBP" selected>GBP</option>
-          <option value="USD">USD</option>
-        </select>
-      </div>
+      <span class="cash-bar-label">Cash per trade</span>
+      <input class="cash-input" id="cashInput" type="number" value="1000" min="1" oninput="refreshCashEstimates()">
+      <select id="cashCurrency" class="cash-input" style="width:64px;" onchange="refreshCashEstimates()">
+        <option value="GBP" selected>GBP</option>
+        <option value="USD">USD</option>
+      </select>
     </div>
 
     <div class="controls-panel" id="controlsBar">
