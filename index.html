@@ -332,6 +332,14 @@ select option{background:var(--chrome-2);}
 .cooldown-track{flex:1;height:4px;background:var(--chrome-4);border-radius:2px;overflow:hidden;}
 .cooldown-fill{height:100%;background:var(--amber);border-radius:2px;transition:width 1s linear;}
 
+/* ── MODE TOGGLE ── */
+.mode-toggle{display:flex;align-items:center;background:var(--chrome-1);border:1px solid var(--edge);border-radius:5px;overflow:hidden;}
+.mode-btn{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;background:none;border:none;color:var(--sheen);cursor:pointer;transition:all .2s;}
+.mode-btn:hover{color:var(--bright);}
+#modeSimple.active{background:rgba(74,127,168,.25);color:#7ab8e8;border-right:1px solid var(--edge);}
+#modeTrader.active{background:rgba(200,136,42,.2);color:var(--amber);}
+#modeSimple:not(.active){border-right:1px solid var(--edge);}
+
 /* ── INTRO PROMPT ── */
 .intro-prompt{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--titanium);margin-bottom:16px;padding:12px 16px;border-left:3px solid var(--steel);background:rgba(255,255,255,.02);}
 .intro-prompt strong{color:var(--silver);}
@@ -457,8 +465,10 @@ select option{background:var(--chrome-2);}
     </div>
     <div class="header-right">
       <button class="history-toggle" id="historyToggle" onclick="toggleSidebar()">☰</button>
-      <div class="live-pill"><div class="live-dot"></div>LIVE</div>
-      <div class="time-display" id="clock">--:--:--</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeSimple" onclick="setMode('simple')">Beginner</button>
+        <button class="mode-btn" id="modeTrader" onclick="setMode('trader')">Trader</button>
+      </div>
     </div>
   </header>
 
@@ -718,9 +728,55 @@ function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
 }
 
+// ── VIEW MODE ─────────────────────────────────────────────────────────────────
+let viewMode = 'simple'; // 'simple' | 'trader'
+
+function setMode(mode) {
+  viewMode = mode;
+  document.getElementById('modeSimple').classList.toggle('active', mode === 'simple');
+  document.getElementById('modeTrader').classList.toggle('active', mode === 'trader');
+  // Re-render all visible cards
+  document.querySelectorAll('.trade-card[data-tobj]').forEach(card => {
+    const t = JSON.parse(card.getAttribute('data-tobj'));
+    const scanDateKey = card.getAttribute('data-scandate') || '';
+    const tier = {id: card.getAttribute('data-tierid') || 'large', liquidityNote: false};
+    const i = parseInt(card.getAttribute('data-cardidx') || '0');
+    const gIdx = parseInt(card.getAttribute('data-gidx') || '0');
+    card.outerHTML = renderCard(t, i, gIdx, tier, scanDateKey);
+  });
+  // Re-animate bars after re-render
+  setTimeout(() => {
+    document.querySelectorAll('.conf-front-bar-fill').forEach(el => {
+      const pct = el.getAttribute('data-pct');
+      if(pct) el.style.width = pct + '%';
+    });
+  }, 100);
+}
+
+// Plain English descriptions for simple mode
+const SIMPLE_PATTERNS = {
+  breakout:      'Ready to break higher — been building pressure in a tight range',
+  accumulation:  'Smart money looks to be buying quietly at these lower prices',
+  momentum:      'Already moving up strongly — catching a brief dip to join the trend',
+  breakdown:     'Losing support — looks set to fall further',
+  distribution:  'Big players appear to be selling at these levels',
+};
+
+const SIMPLE_ALIGNMENT = {
+  aligned:   'The overall market is going the same way — good tailwind',
+  neutral:   'Market is going sideways — no strong help or hindrance',
+  divergent: 'This trade goes against the market direction — higher risk',
+};
+
+const TRADER_PATTERNS = {
+  breakout:     'Price Breakout',
+  accumulation: 'Accumulation / Support Buy',
+  momentum:     'Momentum Continuation',
+  breakdown:    'Breakdown / Short Setup',
+  distribution: 'Distribution / Supply Zone',
+};
+
 // ── CLOCK ──────────────────────────────────────────────────────────────────────
-setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-GB',{hour12:false});},1000);
-document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-GB',{hour12:false});
 let GBP_USD = 1.27;
 
 // ── SIDEBAR ────────────────────────────────────────────────────────────────────
@@ -836,7 +892,30 @@ function refreshCashEstimates(){
 }
 
 // ── PRICE API ─────────────────────────────────────────────────────────────────
-const PRICES_URL = PROXY_URL.replace(/\/$/, '') + '/prices';
+const PRICES_URL  = PROXY_URL.replace(/\/$/, '') + '/prices';
+const SCREEN_URL  = PROXY_URL.replace(/\/$/, '') + '/screen';
+
+// Tier price ranges for Polygon screener
+const TIER_RANGES = {
+  large: { minPrice: 50,  maxPrice: null, label: 'Large Companies ($50+)' },
+  mid:   { minPrice: 10,  maxPrice: 49.99, label: 'Mid-Size Companies ($10-$49)' },
+  small: { minPrice: 0.5, maxPrice: 9.99,  label: 'Smaller Companies (under $10)' },
+};
+
+async function fetchScreenedStocks(tierId) {
+  try {
+    const res = await fetch(SCREEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier: TIER_RANGES[tierId], limit: 15 })
+    });
+    const data = await res.json();
+    return data;
+  } catch(e) {
+    console.warn('Screen failed:', e);
+    return { candidates: [], error: e.message };
+  }
+}
 
 // Twelve Data symbol format:
 // LSE: TICKER:LON (strip any .L suffix the AI adds)
@@ -1039,12 +1118,12 @@ function stopTips() {
 // Step definitions
 const SCAN_STEPS = [
   { id: 'macro',  label: 'Reading US market context (SPY, QQQ)' },
-  { id: 'wait1',  label: 'Preparing large company scan' },
-  { id: 'large',  label: 'Scanning large companies ($50+)' },
-  { id: 'wait2',  label: 'Preparing mid-size company scan' },
-  { id: 'mid',    label: 'Scanning mid-size companies ($10–49)' },
-  { id: 'wait3',  label: 'Preparing smaller company scan' },
-  { id: 'small',  label: 'Scanning smaller companies' },
+  { id: 'wait1',  label: 'Preparing large company screen' },
+  { id: 'large',  label: 'Screening + analysing large companies ($50+)' },
+  { id: 'wait2',  label: 'Preparing mid-size company screen' },
+  { id: 'mid',    label: 'Screening + analysing mid-size companies ($10–49)' },
+  { id: 'wait3',  label: 'Preparing smaller company screen' },
+  { id: 'small',  label: 'Screening + analysing smaller companies' },
 ];
 
 function renderSteps(activeId, doneIds = [], waitId = null, countdown = null) {
@@ -1195,10 +1274,28 @@ async function runScan(){
 
     renderSteps(tier.id, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
     const tsEl = document.getElementById(`ts-${tier.id}`);
-    if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Scanning...`;
-    setStatus(`Scanning ${tier.label.replace(/[🔵🟡🔴]/g,'').trim()}...`, true);
+    if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Screening...`;
+    setStatus(`Screening ${tier.label} with real market data...`, true);
 
-    const up = `${tier.label} swing trades. ${tier.constraint} Market:${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}. ${macroCtx} Return exactly 3 trades with S/R-based entries.`;
+    // Step A — Screen with Polygon for real candidates
+    let screenCtx = '';
+    let screenDate = '';
+    const screenData = await fetchScreenedStocks(tier.id);
+    if(screenData.candidates && screenData.candidates.length > 0) {
+      screenDate = screenData.date || '';
+      const candidateList = screenData.candidates.map(c =>
+        `${c.ticker} close=$${c.close} change=${c.change_pct}% vol=${(c.volume/1000000).toFixed(1)}M${c.closed_near_high?' closed-near-high':''}`
+      ).join(', ');
+      screenCtx = `\nREAL MARKET DATA from ${screenDate} (previous trading day). Analyse ONLY stocks from this screened list — these showed the strongest volume and momentum:\n${candidateList}\nPick the 3 best swing trade setups from this list only.`;
+      if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Analysing...`;
+      setStatus(`Analysing ${tier.label} candidates...`, true);
+    } else {
+      screenCtx = '\nNo screener data available — use your training knowledge to identify candidates.';
+      if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Scanning...`;
+      setStatus(`Scanning ${tier.label}...`, true);
+    }
+
+    const up = `${tier.label} swing trades. ${tier.constraint} Market:${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}.${screenCtx}\n${macroCtx}\nReturn exactly 3 trades with S/R-based entries.`;
     try {
       const parsed = await callAPI(sys, up);
       if(parsed?.trades) {
@@ -1287,24 +1384,60 @@ function clearTradeRecord(ticker,scanDateKey,el){
 function renderCard(t,i,gIdx,tier,scanDateKey){
   const rc=['','r2','r3'][i]||'';
   const isShort=t.direction==='short';
-  const c=t.currency_symbol||'£';
+  const c=t.currency_symbol||'$';
+  const ev=t.ev_score!==undefined?t.ev_score:calcEV(t);
+  const isSimple = viewMode === 'simple';
 
-  // Pattern label (plain English)
-  const patternLabels={breakout:'Price Breakout',accumulation:'Buying Opportunity',momentum:'Trending Move',breakdown:'Falling Pattern',distribution:'Selling Pressure'};
-  const patternLabel=patternLabels[t.setup_type]||t.setup_type;
+  // Pattern — simple vs trader language
+  const patternDesc = isSimple
+    ? (SIMPLE_PATTERNS[t.setup_type] || t.setup_type)
+    : (TRADER_PATTERNS[t.setup_type] || t.setup_type);
+  const patternLabel = isSimple ? (
+    {breakout:'Price Breakout',accumulation:'Buying Opportunity',momentum:'Trending Move',breakdown:'Falling Pattern',distribution:'Selling Pressure'}[t.setup_type] || t.setup_type
+  ) : (TRADER_PATTERNS[t.setup_type] || t.setup_type);
   const patternClass={breakout:'pattern-breakout',accumulation:'pattern-accumulation',momentum:'pattern-momentum',breakdown:'pattern-short',distribution:'pattern-short'}[t.setup_type]||'pattern-breakout';
   const patternTooltipKey={breakout:'breakout',accumulation:'accumulation',momentum:'momentum',breakdown:'breakdown',distribution:'distribution'}[t.setup_type]||'breakout';
 
-  // Edge score
-  const ev=t.ev_score!==undefined?t.ev_score:calcEV(t);
-  const evClass=ev>=1?'edge-strong':ev>=0?'edge-fair':'edge-weak';
-  const evLabel=ev>=1?'Strong Edge':ev>=0.5?'Good Edge':ev>=0?'Marginal Edge':'Avoid';
-  const evSub=ev>=1?'Statistical advantage is strong':ev>=0.5?'Slight advantage — proceed carefully':ev>=0?'Marginal — higher risk':'Numbers don\'t favour this trade';
-
-  // Market alignment
+  // Market alignment — simple vs trader
   const maIcon=t.macro_alignment==='aligned'?'✅':t.macro_alignment==='divergent'?'❌':'⚠️';
-  const maText=t.macro_alignment==='aligned'?'Goes with the market trend':t.macro_alignment==='divergent'?'Against the market — higher risk':'Market is neutral';
+  const maText = isSimple
+    ? (SIMPLE_ALIGNMENT[t.macro_alignment] || 'Market direction unclear')
+    : (t.macro_alignment==='aligned'?'Macro aligned — trend in your favour':t.macro_alignment==='divergent'?'Macro divergent — against market trend':'Macro neutral — no strong tailwind');
   const maCol=t.macro_alignment==='aligned'?'var(--green)':t.macro_alignment==='divergent'?'var(--red)':'var(--sheen)';
+
+  // Confidence section — simple shows plain bar, trader shows win rate details
+  const confHtml = isSimple ? `
+    <div class="conf-front">
+      <div class="conf-front-header">
+        <span class="conf-front-label">Confidence</span>
+        <span class="conf-front-pct" style="color:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};">${t.confidence_pct}%</span>
+      </div>
+      <div class="conf-front-bar-bg"><div class="conf-front-bar-fill" id="conf-fill-${gIdx}" data-pct="${t.confidence_pct}" style="width:0%;background:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};"></div></div>
+      <div class="conf-front-sub">${t.confidence_pct>=70?'High confidence setup':t.confidence_pct>=50?'Moderate confidence':'Lower confidence — proceed carefully'}</div>
+    </div>` : `
+    <div class="conf-front">
+      <div class="conf-front-header">
+        <span class="conf-front-label">Confidence · ${t.backtest_win_rate}% win rate · ${t.backtest_sample} trades</span>
+        <span class="conf-front-pct" style="color:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};">${t.confidence_pct}%</span>
+      </div>
+      <div class="conf-front-bar-bg"><div class="conf-front-bar-fill" id="conf-fill-${gIdx}" data-pct="${t.confidence_pct}" style="width:0%;background:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};"></div></div>
+      <div class="conf-front-sub" style="display:flex;justify-content:space-between;"><span>${t.confidence_pct>=70?'Strong setup':'Moderate setup'}</span><span style="color:var(--sheen)">EV: ${ev>=0?'+':''}${ev.toFixed(2)} · R:R ${t.rr_ratio}:1 · ~${t.expected_days}d hold</span></div>
+    </div>`;
+
+  // Why this trade — simple is thesis only, trader adds signals
+  const signalChips = isSimple ? '' : (t.signals||[]).map(s=>`<span class="signal-chip strong">${s}</span>`).join('');
+  const whyHtml = `
+    <div class="thesis-label">${isSimple ? 'Why this trade' : 'Thesis & Signals'}</div>
+    <div class="thesis-row">${t.thesis}</div>
+    ${signalChips ? `<div class="signals" style="margin-top:6px;">${signalChips}</div>` : ''}`;
+
+  // Volume badge — trader mode shows more detail
+  const volBadge = t.volume_ratio
+    ? `<div class="exchange-tag" style="color:var(--green);border-color:var(--green-dim);background:rgba(76,175,125,.08);">📊 ${isSimple ? 'Unusual volume' : t.volume_ratio+'× avg vol'}</div>`
+    : '';
+
+  // More detail button label
+  const detailBtnLabel = isSimple ? '▼ Full analysis' : '▼ Technical detail';
 
   // Cash
   const ca=parseFloat(document.getElementById('cashInput').value)||1000;const cc=document.getElementById('cashCurrency').value;const pnl=calcCashPnL(t,ca,cc);
@@ -1322,13 +1455,14 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
   // Encode trade for detail panel
   const encoded=encodeURIComponent(JSON.stringify(t));
 
-  return`<div class="trade-card ${outcomeClass}" style="animation-delay:${i*.08}s" data-trade='${JSON.stringify(t)}' data-ticker="${t.ticker}" data-tobj='${JSON.stringify(t)}'>
+  return`<div class="trade-card ${outcomeClass}" style="animation-delay:${i*.08}s" data-trade='${JSON.stringify(t)}' data-ticker="${t.ticker}" data-tobj='${JSON.stringify(t)}' data-scandate="${scanDateKey}" data-tierid="${tier.id}" data-cardidx="${i}" data-gidx="${gIdx}">
     <div class="card-header">
       <div class="rank-badge ${rc}">${t.rank}</div>
       <div class="stock-info">
         <div class="ticker">${t.ticker}</div>
         <div class="company-name">${t.company}</div>
         <div class="exchange-tag">${t.exchange} · ${c}${t.current_price}</div>
+        ${volBadge}
       </div>
       <div class="card-badges">
         <span class="dir-badge ${isShort?'short-badge':'long-badge'}">${isShort?'↓ Sell Short':'↑ Buy'}</span>
@@ -1375,21 +1509,10 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
         </div>
       </div>
 
-      <div class="conf-front">
-        <div class="conf-front-header">
-          <span class="conf-front-label">Confidence</span>
-          <span class="conf-front-pct" style="color:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};">${t.confidence_pct}%</span>
-        </div>
-        <div class="conf-front-bar-bg"><div class="conf-front-bar-fill" id="conf-fill-${gIdx}" style="width:0%;background:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};"></div></div>
-        <div class="conf-front-sub">${t.confidence_pct>=70?'High confidence setup':t.confidence_pct>=50?'Moderate confidence':'Lower confidence — proceed carefully'}</div>
-      </div>
+      ${confHtml}
+      ${whyHtml}
 
-      <div class="thesis-label">Why this trade</div>
-      <div class="thesis-row">${t.thesis}</div>
-
-      <button class="more-detail-btn" onclick="openDetail('${encoded}')">
-        ▼ More detail
-      </button>
+      <button class="more-detail-btn" onclick="openDetail('${encoded}')">${detailBtnLabel}</button>
 
       <div class="track-section" style="margin-top:12px;">${trackerContent}</div>
     </div>
