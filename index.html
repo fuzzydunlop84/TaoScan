@@ -980,6 +980,15 @@ function calcCashPnL(t,ca,cc){
   };
 }
 function fmt(n,ccy){return(ccy==='GBP'?'£':'$')+Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});}
+
+// Format Polygon date string (YYYY-MM-DD) to e.g. "Fri 18 Apr 2026"
+function formatPriceDate(dateStr) {
+  if(!dateStr) return 'prev session';
+  try {
+    const d = new Date(dateStr + 'T12:00:00Z');
+    return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+  } catch(e) { return dateStr; }
+}
 function refreshCashEstimates(){
   const ca=parseFloat(document.getElementById('cashInput').value)||1000;const cc=document.getElementById('cashCurrency').value;
   document.querySelectorAll('.trade-card[data-trade]').forEach(card=>{
@@ -1676,7 +1685,7 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
         </div>
       </div>
       <div style="font-family:var(--mono);font-size:9px;margin:-6px 0 10px;padding:0 2px;color:${t.price_updated?'var(--green)':'var(--sheen)'};">
-        ${t.price_updated ? `📊 Prev session close${t.price_datetime ? ' · ' + t.price_datetime : ''} · Polygon.io` : '⚠ AI estimate — verify before trading'}
+        ${t.price_updated ? `📊 Close price: ${t.price_datetime ? formatPriceDate(t.price_datetime) : 'prev session'} · Polygon.io` : '⚠ AI estimate — verify before trading'}
       </div>
 
       <div class="cash-estimate">
