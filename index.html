@@ -364,6 +364,7 @@ select option{background:var(--chrome-2);}
 
 /* ── PAGE FOOTER ── */
 .page-footer{text-align:center;padding:40px 0 20px;border-top:1px solid var(--chrome-3);margin-top:40px;}
+.footer-legal{font-family:var(--mono);font-size:10px;color:var(--sheen);line-height:1.7;max-width:600px;margin:16px auto 0;}
 .footer-symbol{font-size:36px;color:var(--chrome-4);margin-bottom:6px;line-height:1;}
 .footer-name{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--chrome-4);}
 
@@ -500,7 +501,7 @@ select option{background:var(--chrome-2);}
     </div>
 
     <div class="intro-prompt">
-      Configure your scan and hit <strong>SCAN</strong> to find today's best swing trade opportunities
+      Every day the market leaves clues. Set your filters and find them.
     </div>
 
     <div class="cash-bar">
@@ -556,7 +557,6 @@ select option{background:var(--chrome-2);}
 
     <div class="disclaimer">
       <div class="disclaimer-price">📊 Prices shown are <strong>previous trading day's closing prices</strong> from Polygon.io. During market hours this is yesterday's close. After 9pm BST the current day's close may not yet be available. Always verify the current price before entering any trade.</div>
-      <div class="disclaimer-legal">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves significant risk of capital loss. S/R levels and trade analysis are AI-generated estimates.</div>
     </div>
 
     <div class="how-it-works" id="howItWorks">
@@ -589,6 +589,7 @@ select option{background:var(--chrome-2);}
     <div class="page-footer">
       <div class="footer-symbol">道</div>
       <div class="footer-name">TaoScan</div>
+      <div class="footer-legal">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves significant risk of capital loss. S/R levels and trade analysis are AI-generated estimates.</div>
     </div>
 
   </main>
@@ -765,22 +766,23 @@ function closeDetail() {
 // ── HOW IT WORKS ─────────────────────────────────────────────────────────────
 let viewMode = 'simple';
 const HIW_BEGINNER = [
-  { icon: '📈', title: 'Step 1 — Market check', desc: 'Before looking at any stocks, TaoScan checks how the overall US market is doing by looking at the S&P 500 and Nasdaq. If the market is rising, we favour buying opportunities. If it\'s falling, we\'re more cautious.' },
-  { icon: '🔍', title: 'Step 2 — Finding standout stocks', desc: 'We scan thousands of US stocks from the previous trading day and look for ones that stood out — where significantly more people than usual were buying and selling, and where the price closed strongly near its high for the day.' },
-  { icon: '🤖', title: 'Step 3 — AI analysis', desc: 'An AI then studies those shortlisted stocks and identifies setups where the price is sitting at a level where buyers have historically stepped in. It looks for patterns that have preceded upward moves in the past.' },
-  { icon: '💰', title: 'Step 4 — Setting your price levels', desc: 'For each trade it sets three key prices: where to buy in, where to take your profit, and where to cut your losses if the trade goes wrong. These are based on key price levels the stock has respected before.' },
-  { icon: '🏆', title: 'Step 5 — Ranking the best ones', desc: 'Trades are ranked by how statistically favourable they are — combining how often this type of setup has worked in the past with how much you could make versus how much you could lose.' },
+  { icon: '📈', title: 'Step 1 — Market check', desc: 'Before looking at any stocks, TaoScan checks how the overall US market is doing using real closing prices from the previous session. If the S&P 500 and Nasdaq are rising, we favour buying opportunities. If they\'re falling, we\'re more cautious.' },
+  { icon: '🔍', title: 'Step 2 — Finding standout stocks', desc: 'We scan thousands of US stocks from the previous trading day. We look for stocks that stood out — where more people than usual were buying and selling, where the price closed strongly near its high, and where the stock did better than the overall market. Stocks that outperform the market tend to keep outperforming.' },
+  { icon: '⚠️', title: 'Step 3 — Flagging earnings risk', desc: 'Companies announce their financial results a few times a year. These "earnings" dates can cause stocks to jump or crash 10-20% overnight. We check whether any shortlisted stock has earnings coming up soon and warn you clearly if so — so you can decide whether to avoid it or trade with a smaller amount.' },
+  { icon: '🤖', title: 'Step 4 — AI analysis with real data', desc: 'An AI studies the shortlisted stocks using their actual price data from the previous session — where they opened, how high and low they went, and where they closed. It uses this real data to identify price levels where buyers have historically stepped in, rather than relying on memory alone.' },
+  { icon: '💰', title: 'Step 5 — Setting your price levels', desc: 'For each trade the AI sets three key prices: where to buy in, where to take your profit, and where to cut your losses if the trade goes wrong. These are adjusted to match the real closing price from Polygon.io.' },
+  { icon: '🏆', title: 'Step 6 — Ranking the best ones', desc: 'Trades are ranked by how statistically favourable they are — combining how often this type of setup has worked historically with how much you could make versus how much you could lose.' },
 ];
 
 const HIW_TRADER = [
   { icon: '📊', title: '1. Macro context (Polygon.io)', desc: 'SPY and QQQ previous close prices are fetched from Polygon.io and injected into the AI prompt. Groq\'s model assesses trend direction, key S/R levels and overall market bias (bullish/neutral/bearish) anchored to real price data.' },
-  { icon: '🔬', title: '2. Quantitative screening (Polygon.io)', desc: 'Previous day grouped daily aggregates are pulled for all NYSE/NASDAQ stocks. Each is scored: volume vs session average (40%), intraday momentum close vs open (35%), close proximity to session high (25%). Top 15 per tier shortlisted.' },
-  { icon: '🧠', title: '3. LLM analysis (Groq — Llama 3.3 70b)', desc: 'The shortlisted tickers are passed to Groq\'s Llama 3.3 70b model with macro context. It identifies S/R-based entries, classifies patterns (breakout/accumulation/momentum), assesses macro alignment, and generates buy/target/stop levels.' },
+  { icon: '🔬', title: '2. Quantitative screening (Polygon.io)', desc: 'Previous day grouped aggregates pulled for all NYSE/NASDAQ stocks. Each scored on: volume (25%), intraday momentum (25%), close vs session high (20%), relative strength vs SPY (20%), VWAP position (10%). Top 15 per tier shortlisted with sector diversification applied.' },
+  { icon: '🧠', title: '3. LLM analysis (Groq — Llama 3.3 70b)', desc: 'Full OHLCV data, RS vs SPY, VWAP position and earnings flags for all 15 candidates are passed to Groq. The model uses actual price action — not just ticker names — to identify S/R levels, classify patterns and generate trade levels.' },
   { icon: '📐', title: '4. EV ranking', desc: 'Trades are ranked by Expected Value: (win_rate × R:R) − (loss_rate × 1). Positive EV indicates statistical edge over a large sample. Trades are trimmed to the top 3 per tier by EV score before display.' },
   { icon: '💹', title: '5. Price adjustment (Polygon.io)', desc: 'AI-suggested price levels are scaled proportionally to the actual Polygon previous close, correcting for divergence between the model\'s training data prices and current market prices.' },
 ];
 
-const HIW_LIMITATIONS_BEGINNER = 'One important thing to know: TaoScan is a starting point, not a guarantee. The AI learned from historical data and can\'t see what\'s happening right now. Always check the current price and do your own research before making any trade.';
+const HIW_LIMITATIONS_BEGINNER = 'One important thing to know: TaoScan is a starting point, not a guarantee. The AI learned from historical data and can\'t see what\'s happening right now in the market. Prices shown are from the previous session\'s close. Earnings warnings are based on available data but may not be complete. Always check the current price and do your own research before making any trade.';
 
 const HIW_LIMITATIONS_TRADER = 'Limitations: LLM analysis is bounded by training data cutoff — no live chart analysis or order flow. Volume scoring uses previous day data only (free tier). S/R levels are model-generated estimates. No earnings calendar integration beyond AI knowledge. Screener scoring is a simplified proxy for relative strength — no true RS calculation against benchmark.';
 
@@ -1048,6 +1050,8 @@ function enrichTradesFromScreener(trades, screenCandidates, screenDate) {
         key_resistance: isFinite(ratio) && ratio > 0 ? Math.round(t.key_resistance * ratio * 100) / 100 : t.key_resistance,
         price_updated: true,
         price_source: 'polygon',
+        // Override AI earnings guess with real Polygon data
+        earnings_warning: match.earnings_soon || t.earnings_warning,
       };
     }
     return { ...t, price_updated: false };
@@ -1356,10 +1360,25 @@ async function runScan(){
     const screenData = await fetchScreenedStocks(tier.id);
     if(screenData.candidates && screenData.candidates.length > 0) {
       screenDate = screenData.date || '';
-      const candidateList = screenData.candidates.map(c =>
-        `${c.ticker} close=$${c.close} change=${c.change_pct}% vol=${(c.volume/1000000).toFixed(1)}M${c.closed_near_high?' closed-near-high':''}`
-      ).join(', ');
-      screenCtx = `\nREAL MARKET DATA from ${screenDate} (previous trading day). Analyse ONLY stocks from this screened list — these showed the strongest volume and momentum:\n${candidateList}\nPick the 3 best swing trade setups from this list only.`;
+      const spyChange = screenData.spy_change_pct || 0;
+
+      // Improvement 5: Pass full OHLCV + RS + earnings + VWAP to AI
+      const candidateList = screenData.candidates.map(c => {
+        const parts = [
+          `${c.ticker}`,
+          `O=$${c.open} H=$${c.high} L=$${c.low} C=$${c.close}`,
+          `vol=${(c.volume/1000000).toFixed(1)}M`,
+          `chg=${c.change_pct}%`,
+          `RS_vs_SPY=${c.rs_vs_spy>=0?'+':''}${c.rs_vs_spy}%`,
+          c.above_vwap !== null ? (c.above_vwap ? 'above-VWAP' : 'below-VWAP') : '',
+          c.closed_near_high ? 'closed-near-high' : '',
+          c.earnings_soon ? '⚠EARNINGS-SOON' : '',  // Improvement 1
+        ].filter(Boolean).join(' ');
+        return parts;
+      }).join('\n');
+
+      screenCtx = `\nREAL MARKET DATA from ${screenDate}. SPY change: ${spyChange>=0?'+':''}${spyChange}% (use for relative strength context).\nAnalyse ONLY these pre-screened stocks with their actual OHLCV data:\n${candidateList}\n\nFor each candidate: use the real O/H/L/C to identify S/R levels, assess pattern quality, check RS vs SPY. Flag ⚠EARNINGS-SOON stocks as higher risk. Pick the 3 best setups from this list only.`;
+
       if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Analysing...`;
       setStatus(`Analysing ${tier.label} candidates...`, true);
     } else {
@@ -1501,14 +1520,23 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
 
   // Why this trade — simple is thesis only, trader adds signals
   const signalChips = isSimple ? '' : (t.signals||[]).map(s=>`<span class="signal-chip strong">${s}</span>`).join('');
+  const rrPlain = `For every £1 you risk, you could make £${t.rr_ratio}`;
   const whyHtml = `
     <div class="thesis-label">${isSimple ? 'Why this trade' : 'Thesis & Signals'}</div>
     <div class="thesis-row">${t.thesis}</div>
-    ${signalChips ? `<div class="signals" style="margin-top:6px;">${signalChips}</div>` : ''}`;
+    ${signalChips ? `<div class="signals" style="margin-top:6px;">${signalChips}</div>` : ''}
+    ${isSimple ? `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:8px 11px;background:var(--bg);border:1px solid var(--chrome-4);border-radius:5px;">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--sheen);">Reward/Risk <span style="cursor:pointer;color:var(--steel);" onclick="showTooltip('rr')">ℹ</span></span>
+      <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green);">${t.rr_ratio}× &nbsp;<span style="font-size:10px;color:var(--sheen);font-weight:400;">${rrPlain}</span></span>
+    </div>` : ''}`;
 
-  // Volume badge — trader mode shows more detail
+  // Volume + RS badge — trader mode shows more detail
   const volBadge = t.volume_ratio
     ? `<div class="exchange-tag" style="color:var(--green);border-color:var(--green-dim);background:rgba(76,175,125,.08);">📊 ${isSimple ? 'Unusual volume' : t.volume_ratio+'× avg vol'}</div>`
+    : '';
+  const rsBadge = !isSimple && t.rs_vs_spy !== undefined
+    ? `<div class="exchange-tag" style="color:${t.rs_vs_spy>=0?'var(--green)':'var(--red)'};border-color:${t.rs_vs_spy>=0?'var(--green-dim)':'var(--red-dim)'};background:${t.rs_vs_spy>=0?'rgba(76,175,125,.08)':'rgba(201,64,64,.08)'};">RS vs SPY: ${t.rs_vs_spy>=0?'+':''}${t.rs_vs_spy}%</div>`
     : '';
 
   // More detail button label
@@ -1538,6 +1566,7 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
         <div class="company-name">${t.company}</div>
         <div class="exchange-tag">${t.exchange} · ${c}${t.current_price}</div>
         ${volBadge}
+        ${rsBadge}
       </div>
       <div class="card-badges">
         <span class="dir-badge ${isShort?'short-badge':'long-badge'}">${isShort?'↓ Sell Short':'↑ Buy'}</span>
