@@ -908,7 +908,11 @@ function parseJSON(raw){
 }
 async function callAPI(sys,usr){
   const res=await fetch(PROXY_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:sys,messages:[{role:'user',content:usr}],max_tokens:3000})});
-  const data=await res.json();if(!res.ok)throw new Error(typeof data.error==='string'?data.error:data.error?.message||'API error');
+  const data=await res.json();
+  if(!res.ok){
+    const msg = typeof data.error==='string' ? data.error : data.error?.message || 'API error';
+    throw new Error(msg);
+  }
   return parseJSON(data.content.map(b=>b.text||'').join(''));
 }
 
@@ -1139,10 +1143,24 @@ async function runScan(){
   setStatus('Analysing market context...', true);
   let macroData = null, macroCtx = '';
   try {
+    setStatus('Fetching live index prices...', true);
     macroData = await getMacroContext();
     cachedMacro = macroData; macroLoadedAt = Date.now();
     macroCtx = `MACRO: SPY ${macroData.spy?.trend} bias=${macroData.spy?.macro_bias} S=$${macroData.spy?.key_support} R=$${macroData.spy?.key_resistance}. QQQ bias=${macroData.qqq?.macro_bias}. US:${macroData.overall_us_bias}. ${macroData.swing_filter||''}`;
-  } catch(e) { console.warn('Macro failed', e); }
+    renderSteps('macro', ['macro']);
+  } catch(e) {
+    console.warn('Macro failed', e);
+    // Check if it's a rate limit / daily limit error
+    if(e.message && (e.message.includes('capacity') || e.message.includes('rate') || e.message.includes('limit'))) {
+      stopTips();
+      document.getElementById('loadingPanel').style.display = 'none';
+      showError('AI models are at their daily limit. Please try again after midnight UTC (1am BST). The limit resets daily.');
+      setStatus('Daily limit reached — try again after midnight UTC', false);
+      btn.disabled = false; btn.classList.remove('loading');
+      return;
+    }
+    setStatus('Market context unavailable — continuing without macro...', true);
+  }
 
   // Build results area
   document.getElementById('resultsArea').innerHTML =
