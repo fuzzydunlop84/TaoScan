@@ -344,6 +344,24 @@ select option{background:var(--chrome-2);}
 .intro-prompt{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--titanium);margin-bottom:16px;padding:12px 16px;border-left:3px solid var(--steel);background:rgba(255,255,255,.02);}
 .intro-prompt strong{color:var(--silver);}
 
+/* ── HOW IT WORKS ── */
+.how-it-works{background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:6px;margin-bottom:14px;overflow:hidden;}
+.hiw-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;background:none;border:none;cursor:pointer;text-align:left;transition:background .2s;}
+.hiw-toggle:hover{background:rgba(255,255,255,.03);}
+.hiw-toggle-icon{font-family:var(--mono);font-size:10px;color:var(--sheen);transition:transform .2s;display:inline-block;}
+.hiw-toggle-label{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--titanium);text-transform:uppercase;}
+.hiw-body{padding:0 16px 16px;border-top:1px solid var(--chrome-4);}
+.hiw-step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.hiw-step:last-child{border-bottom:none;padding-bottom:0;}
+.hiw-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--steel);background:var(--chrome-2);border:1px solid var(--chrome-4);border-radius:4px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.hiw-icon{font-size:18px;flex-shrink:0;margin-top:1px;width:24px;text-align:center;}
+.hiw-step-content{}
+.hiw-step-title{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--bright);margin-bottom:4px;letter-spacing:.04em;}
+.hiw-step-desc{font-family:var(--mono);font-size:11px;color:var(--sheen);line-height:1.7;}
+.hiw-limitations{margin-top:14px;padding:10px 14px;background:rgba(200,136,42,.06);border:1px solid rgba(200,136,42,.2);border-radius:5px;}
+.hiw-lim-title{font-family:var(--mono);font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.hiw-lim-text{font-family:var(--mono);font-size:10px;color:var(--sheen);line-height:1.7;}
+
 /* ── PAGE FOOTER ── */
 .page-footer{text-align:center;padding:40px 0 20px;border-top:1px solid var(--chrome-3);margin-top:40px;}
 .footer-symbol{font-size:36px;color:var(--chrome-4);margin-bottom:6px;line-height:1;}
@@ -541,9 +559,19 @@ select option{background:var(--chrome-2);}
       <div class="disclaimer-legal">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves significant risk of capital loss. S/R levels and trade analysis are AI-generated estimates.</div>
     </div>
 
-    <div class="status-bar">
+    <div class="how-it-works" id="howItWorks">
+      <button class="hiw-toggle" onclick="toggleHIW()">
+        <span class="hiw-toggle-icon" id="hiwIcon">▶</span>
+        <span class="hiw-toggle-label">How does TaoScan find trades?</span>
+      </button>
+      <div class="hiw-body" id="hiwBody" style="display:none;">
+        <div id="hiwContent"></div>
+      </div>
+    </div>
+
+    <div class="status-bar" id="statusBar" style="display:none;">
       <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">Ready — hit SCAN to begin</span>
+      <span id="statusText">Ready</span>
     </div>
     <div id="errorMsg" class="error-msg" style="display:none;"></div>
 
@@ -734,14 +762,64 @@ function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
 }
 
-// ── VIEW MODE ─────────────────────────────────────────────────────────────────
-let viewMode = 'simple'; // 'simple' | 'trader'
+// ── HOW IT WORKS ─────────────────────────────────────────────────────────────
+let viewMode = 'simple';
+const HIW_BEGINNER = [
+  { icon: '📈', title: 'Step 1 — Market check', desc: 'Before looking at any stocks, TaoScan checks how the overall US market is doing by looking at the S&P 500 and Nasdaq. If the market is rising, we favour buying opportunities. If it\'s falling, we\'re more cautious.' },
+  { icon: '🔍', title: 'Step 2 — Finding standout stocks', desc: 'We scan thousands of US stocks from the previous trading day and look for ones that stood out — where significantly more people than usual were buying and selling, and where the price closed strongly near its high for the day.' },
+  { icon: '🤖', title: 'Step 3 — AI analysis', desc: 'An AI then studies those shortlisted stocks and identifies setups where the price is sitting at a level where buyers have historically stepped in. It looks for patterns that have preceded upward moves in the past.' },
+  { icon: '💰', title: 'Step 4 — Setting your price levels', desc: 'For each trade it sets three key prices: where to buy in, where to take your profit, and where to cut your losses if the trade goes wrong. These are based on key price levels the stock has respected before.' },
+  { icon: '🏆', title: 'Step 5 — Ranking the best ones', desc: 'Trades are ranked by how statistically favourable they are — combining how often this type of setup has worked in the past with how much you could make versus how much you could lose.' },
+];
 
+const HIW_TRADER = [
+  { icon: '📊', title: '1. Macro context (Polygon.io)', desc: 'SPY and QQQ previous close prices are fetched from Polygon.io and injected into the AI prompt. Groq\'s model assesses trend direction, key S/R levels and overall market bias (bullish/neutral/bearish) anchored to real price data.' },
+  { icon: '🔬', title: '2. Quantitative screening (Polygon.io)', desc: 'Previous day grouped daily aggregates are pulled for all NYSE/NASDAQ stocks. Each is scored: volume vs session average (40%), intraday momentum close vs open (35%), close proximity to session high (25%). Top 15 per tier shortlisted.' },
+  { icon: '🧠', title: '3. LLM analysis (Groq — Llama 3.3 70b)', desc: 'The shortlisted tickers are passed to Groq\'s Llama 3.3 70b model with macro context. It identifies S/R-based entries, classifies patterns (breakout/accumulation/momentum), assesses macro alignment, and generates buy/target/stop levels.' },
+  { icon: '📐', title: '4. EV ranking', desc: 'Trades are ranked by Expected Value: (win_rate × R:R) − (loss_rate × 1). Positive EV indicates statistical edge over a large sample. Trades are trimmed to the top 3 per tier by EV score before display.' },
+  { icon: '💹', title: '5. Price adjustment (Polygon.io)', desc: 'AI-suggested price levels are scaled proportionally to the actual Polygon previous close, correcting for divergence between the model\'s training data prices and current market prices.' },
+];
+
+const HIW_LIMITATIONS_BEGINNER = 'One important thing to know: TaoScan is a starting point, not a guarantee. The AI learned from historical data and can\'t see what\'s happening right now. Always check the current price and do your own research before making any trade.';
+
+const HIW_LIMITATIONS_TRADER = 'Limitations: LLM analysis is bounded by training data cutoff — no live chart analysis or order flow. Volume scoring uses previous day data only (free tier). S/R levels are model-generated estimates. No earnings calendar integration beyond AI knowledge. Screener scoring is a simplified proxy for relative strength — no true RS calculation against benchmark.';
+
+let hiwOpen = false;
+function toggleHIW() {
+  hiwOpen = !hiwOpen;
+  document.getElementById('hiwBody').style.display = hiwOpen ? 'block' : 'none';
+  document.getElementById('hiwIcon').style.transform = hiwOpen ? 'rotate(90deg)' : '';
+  if(hiwOpen) renderHIW();
+}
+
+function renderHIW() {
+  const isSimple = viewMode === 'simple';
+  const steps = isSimple ? HIW_BEGINNER : HIW_TRADER;
+  const lim = isSimple ? HIW_LIMITATIONS_BEGINNER : HIW_LIMITATIONS_TRADER;
+  const limTitle = isSimple ? '⚠ One thing to keep in mind' : '⚠ Known limitations';
+  document.getElementById('hiwContent').innerHTML =
+    `<div style="padding-top:4px;">${steps.map(s => `
+      <div class="hiw-step">
+        <div class="hiw-icon">${s.icon}</div>
+        <div class="hiw-step-content">
+          <div class="hiw-step-title">${s.title}</div>
+          <div class="hiw-step-desc">${s.desc}</div>
+        </div>
+      </div>`).join('')}
+      <div class="hiw-limitations">
+        <div class="hiw-lim-title">${limTitle}</div>
+        <div class="hiw-lim-text">${lim}</div>
+      </div>
+    </div>`;
+}
+
+// Re-render HIW content when mode switches
+const _origSetMode = setMode;
+// Patch setMode to also refresh HIW if open
 function setMode(mode) {
   viewMode = mode;
   document.getElementById('modeSimple').classList.toggle('active', mode === 'simple');
   document.getElementById('modeTrader').classList.toggle('active', mode === 'trader');
-  // Re-render all visible cards
   document.querySelectorAll('.trade-card[data-tobj]').forEach(card => {
     const t = JSON.parse(card.getAttribute('data-tobj'));
     const scanDateKey = card.getAttribute('data-scandate') || '';
@@ -750,16 +828,17 @@ function setMode(mode) {
     const gIdx = parseInt(card.getAttribute('data-gidx') || '0');
     card.outerHTML = renderCard(t, i, gIdx, tier, scanDateKey);
   });
-  // Re-animate bars after re-render
   setTimeout(() => {
     document.querySelectorAll('.conf-front-bar-fill').forEach(el => {
       const pct = el.getAttribute('data-pct');
       if(pct) el.style.width = pct + '%';
     });
   }, 100);
+  if(hiwOpen) renderHIW();
 }
 
-// Plain English descriptions for simple mode
+// ── VIEW MODE ─────────────────────────────────────────────────────────────────
+// ── CLOCK ──────────────────────────────────────────────────────────────────────
 const SIMPLE_PATTERNS = {
   breakout:      'Ready to break higher — been building pressure in a tight range',
   accumulation:  'Smart money looks to be buying quietly at these lower prices',
@@ -789,7 +868,12 @@ let GBP_USD = 1.27;
 function switchTab(tab){document.querySelectorAll('.stab').forEach((el,i)=>el.classList.toggle('active',['history','performance'][i]===tab));document.querySelectorAll('.sidebar-panel').forEach(el=>el.classList.remove('active'));document.getElementById(`panel-${tab}`).classList.add('active');if(tab==='performance')renderPerformancePanel();}
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('visible');}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('visible');}
-function setStatus(t,a=false){document.getElementById('statusText').textContent=t;document.getElementById('statusDot').className='status-dot'+(a?' active':'');}
+function setStatus(t,a=false){
+  const bar=document.getElementById('statusBar');
+  document.getElementById('statusText').textContent=t;
+  document.getElementById('statusDot').className='status-dot'+(a?' active':'');
+  if(bar) bar.style.display = a ? 'flex' : 'none';
+}
 function showError(m){const e=document.getElementById('errorMsg');e.textContent='⚠ '+m;e.style.display='block';}
 function clearError(){document.getElementById('errorMsg').style.display='none';}
 function toast(msg,col){const t=document.getElementById('saveToast');t.textContent=msg;t.style.background=col||'linear-gradient(135deg,var(--chrome-3),var(--chrome-4))';t.style.color=col?'#fff':'var(--silver)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
@@ -1305,6 +1389,8 @@ async function runScan(){
   // Done
   stopTips();
   document.getElementById('loadingPanel').style.display = 'none';
+  const bar = document.getElementById('statusBar');
+  if(bar) bar.style.display = 'flex';
   setStatus('Scan complete — next scan available in 5 minutes', false);
   const summary = collectedTiers.find(r=>r.trades?.length)?.trades?.[0]?.thesis || '';
   const dl = direction==='long'?'↑ Long':direction==='short'?'↓ Short':'↕ Both';
