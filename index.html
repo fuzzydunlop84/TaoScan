@@ -415,8 +415,8 @@ select option{background:var(--chrome-2);}
   .history-toggle{display:flex!important;align-items:center;}
   .controls-panel{flex-direction:column;align-items:stretch;}
   .control-group{width:100%;}
-  select{width:100%;}
-  .scan-btn{margin-left:0;width:100%;}
+  select{width:100%;font-size:14px;padding:9px 10px;}
+  .scan-btn{margin-left:0;width:100%;font-size:16px;}
   .tier-select-panel{flex-wrap:wrap!important;overflow-x:visible!important;}
   .tier-check{flex:1 1 calc(50% - 4px);min-width:120px;}
   .results-grid{grid-template-columns:1fr;}
@@ -426,6 +426,22 @@ select option{background:var(--chrome-2);}
   .macro-index{border-right:none;border-bottom:1px solid var(--chrome-4);}
   .macro-index:last-child{border-bottom:none;}
   .detail-panel{max-height:90vh;}
+  /* Larger text on mobile cards */
+  .ticker{font-size:26px;}
+  .company-name{font-size:14px;}
+  .level-label{font-size:10px;}
+  .level-value{font-size:16px;}
+  .cash-lbl{font-size:10px;}
+  .cash-val{font-size:17px;}
+  .cash-dual{font-size:10px;}
+  .conf-front-pct{font-size:26px;}
+  .conf-front-label{font-size:11px;}
+  .conf-front-sub{font-size:11px;}
+  .thesis-row{font-size:15px;}
+  .thesis-label{font-size:10px;}
+  .mt-text{font-size:13px;}
+  .outcome-btn{font-size:13px;padding:10px 0;}
+  .more-detail-btn{font-size:13px;padding:11px 0;}
 }
 </style>
 </head>
@@ -755,7 +771,7 @@ function openDetail(tradeJSON) {
 
     <div class="detail-section">
       <div class="detail-section-title">Trade Metrics</div>
-      <div class="detail-row"><span class="detail-key">Reward/Risk <button onclick="showTooltip('rr')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val">${t.rr_ratio}× — for every $1 risked, potential $${t.rr_ratio} gain</span></div>
+      <div class="detail-row"><span class="detail-key">Reward/Risk <button onclick="showTooltip('rr')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val">${realRR}× — for every $1 risked, potential $${realRR} gain</span></div>
       <div class="detail-row"><span class="detail-key">Edge Score <button onclick="showTooltip('edge')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val" style="color:${ev>=1?'var(--green)':ev>=0?'var(--amber)':'var(--red)'};">${ev>=0?'+':''}${ev.toFixed(2)} — ${evLabel}</span></div>
       <div class="detail-row"><span class="detail-key">Estimated hold time</span><span class="detail-val">${t.expected_days} days</span></div>
       <div class="detail-row"><span class="detail-key">Average win on this pattern</span><span class="detail-val">${t.backtest_avg_gain}%</span></div>
@@ -1110,7 +1126,13 @@ async function callAPI(sys,usr){
 }
 
 // ── EV ─────────────────────────────────────────────────────────────────────────
-function calcEV(t){const wr=(t.backtest_win_rate||t.confidence_pct)/100,rr=t.rr_ratio||1;return Math.round(((wr*rr)-((1-wr)*1))*100)/100;}
+function calcEV(t){
+  const wr=(t.backtest_win_rate||t.confidence_pct)/100;
+  const rr = t.buy_price && t.target_price && t.stop_price && (t.buy_price-t.stop_price)>0
+    ? (t.target_price-t.buy_price)/(t.buy_price-t.stop_price)
+    : (t.rr_ratio||1);
+  return Math.round(((wr*rr)-((1-wr)*1))*100)/100;
+}
 function evRankAndTrim(trades){
   if(!trades||!trades.length)return trades;
   const w=trades.map(t=>({...t,ev_score:calcEV(t)}));w.sort((a,b)=>b.ev_score-a.ev_score);
@@ -1607,20 +1629,41 @@ function renderCard(t,i,gIdx,tier,scanDateKey){
         <span class="conf-front-pct" style="color:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};">${t.confidence_pct}%</span>
       </div>
       <div class="conf-front-bar-bg"><div class="conf-front-bar-fill" id="conf-fill-${gIdx}" data-pct="${t.confidence_pct}" style="width:0%;background:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};"></div></div>
-      <div class="conf-front-sub" style="display:flex;justify-content:space-between;"><span>${t.confidence_pct>=70?'Strong setup':'Moderate setup'}</span><span style="color:var(--sheen)">EV: ${ev>=0?'+':''}${ev.toFixed(2)} · R:R ${t.rr_ratio}:1 · ~${t.expected_days}d hold</span></div>
+      <div class="conf-front-sub" style="display:flex;justify-content:space-between;"><span>${t.confidence_pct>=70?'Strong setup':'Moderate setup'}</span><span style="color:var(--sheen)">EV: ${ev>=0?'+':''}${ev.toFixed(2)} · R:R ${realRR}:1 · ~${t.expected_days}d hold</span></div>
     </div>`;
 
-  // Why this trade — simple is thesis only, trader adds signals
+  // Why this trade — simple is thesis only, trader adds signals + S/R
   const signalChips = isSimple ? '' : (t.signals||[]).map(s=>`<span class="signal-chip strong">${s}</span>`).join('');
-  const rrPlain = `For every £1 you risk, you could make £${t.rr_ratio}`;
+  // Calculate real R:R from actual prices — don't trust AI's rr_ratio field
+  const realRR = t.buy_price && t.target_price && t.stop_price && (t.buy_price - t.stop_price) > 0
+    ? Math.round(((t.target_price - t.buy_price) / (t.buy_price - t.stop_price)) * 100) / 100
+    : t.rr_ratio;
+  const rrPlain = `For every £1 you risk, you could make £${realRR}`;
+
+  // S/R row for trader mode
+  const srRow = !isSimple && (t.key_support || t.key_resistance) ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
+      ${t.key_support ? `<div style="padding:8px 10px;background:rgba(76,175,125,.07);border:1px solid var(--green-dim);border-radius:5px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Support</div>
+        <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green);">$${parseFloat(t.key_support).toFixed(2)}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--sheen);margin-top:2px;">${t.current_price && t.key_support ? ((t.current_price-t.key_support)/t.key_support*100).toFixed(1)+'% away' : ''}</div>
+      </div>` : ''}
+      ${t.key_resistance ? `<div style="padding:8px 10px;background:rgba(201,64,64,.07);border:1px solid var(--red-dim);border-radius:5px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Resistance</div>
+        <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red);">$${parseFloat(t.key_resistance).toFixed(2)}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--sheen);margin-top:2px;">${t.current_price && t.key_resistance ? ((t.key_resistance-t.current_price)/t.current_price*100).toFixed(1)+'% away' : ''}</div>
+      </div>` : ''}
+    </div>` : '';
+
   const whyHtml = `
     <div class="thesis-label">${isSimple ? 'Why this trade' : 'Thesis & Signals'}</div>
     <div class="thesis-row">${t.thesis}</div>
     ${signalChips ? `<div class="signals" style="margin-top:6px;">${signalChips}</div>` : ''}
+    ${srRow}
     ${isSimple ? `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:8px 11px;background:var(--bg);border:1px solid var(--chrome-4);border-radius:5px;">
       <span style="font-family:var(--mono);font-size:10px;color:var(--sheen);">Reward/Risk <span style="cursor:pointer;color:var(--steel);" onclick="showTooltip('rr')">ℹ</span></span>
-      <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green);">${t.rr_ratio}× &nbsp;<span style="font-size:10px;color:var(--sheen);font-weight:400;">${rrPlain}</span></span>
+      <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green);">${realRR}× &nbsp;<span style="font-size:10px;color:var(--sheen);font-weight:400;">${rrPlain}</span></span>
     </div>` : ''}`;
 
   // Volume + RS badge — trader mode shows more detail
