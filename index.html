@@ -37,10 +37,11 @@ body {
   color-scheme: light;
 }
 .site-logo-circle {
-  width: 42px; height: 42px; min-width: 42px; min-height: 42px;
+  width: 42px; height: 42px; min-width: 42px;
+  aspect-ratio: 1 / 1;
   background: #5BB5A2; border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  color: white; overflow: hidden;
+  color: white; overflow: hidden; flex-shrink: 0;
 }
 .site-logo-my  { font-size: 0.85rem; font-weight: 500; line-height: 1; }
 .site-logo-sub { font-size: 0.44rem; font-weight: 300; letter-spacing: 0.06em; line-height: 1.2; }
