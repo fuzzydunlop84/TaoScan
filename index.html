@@ -3,1764 +3,743 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaoScan — the market speaks. Are you listening?</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<meta name="color-scheme" content="light">
+<title>Gift Finder — My 1st Years</title>
+
+<!-- Open Graph / LinkedIn -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Personalised Gift Finder — My 1st Years">
+<meta property="og:description" content="Answer 3 quick questions and get personalised gift recommendations for babies and children — from one of the UK's most loved personalised gift brands.">
+<meta property="og:image" content="https://www.my1styears.com/media/mf_webp/jpg/media/catalog/product/cache/6d8e41e98cbb1c031bf3bc2f71c0a169/5/0/50112562teddy-bear-plush-toy-a.webp">
+<meta property="og:url" content="https://yourusername.github.io/my1styears-gift-finder">
+<meta name="description" content="Answer 3 quick questions and get personalised gift recommendations for babies and children — from one of the UK's most loved personalised gift brands.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#0d0e10; --chrome-1:#1a1c20; --chrome-2:#22252b; --chrome-3:#2c3038;
-  --chrome-4:#383d47; --edge:#4a5060; --sheen:#6b7585; --highlight:#9aa3b0;
-  --bright:#c8d0db; --white:#e8ecf2; --steel:#7a8fa6; --titanium:#a8b8c8; --silver:#c5cfd8;
-  --green:#4caf7d; --green-dim:#2d6b4a; --red:#c94040; --red-dim:#6b2828;
-  --amber:#c8882a; --blue:#4a7fa8;
-  --mono:'Share Tech Mono',monospace; --sans:'Rajdhani',sans-serif;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #FAF8F5;
+  min-height: 100vh;
+  margin: 0;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--bright);font-family:var(--sans);min-height:100vh;overflow-x:hidden;font-weight:500;}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.008) 2px,rgba(255,255,255,0.008) 3px);pointer-events:none;z-index:0;}
 
-.app-shell{display:flex;min-height:100vh;}
+/* ── MOCK SITE ── */
+.site-bar {
+  background: #5BB5A2; color: white; text-align: center;
+  font-size: 0.72rem; letter-spacing: 0.08em; padding: 9px 20px; font-weight: 500;
+}
+.site-header {
+  background: white; border-bottom: 1px solid #EDE8E0;
+  padding: 14px 40px; display: flex; align-items: center; justify-content: space-between;
+}
+.site-logo-circle {
+  width: 42px; height: 42px; background: #5BB5A2; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+}
+.site-logo-my  { font-size: 0.85rem; font-weight: 500; line-height: 1; }
+.site-logo-sub { font-size: 0.44rem; font-weight: 300; letter-spacing: 0.06em; line-height: 1.2; }
+.site-nav { display: flex; gap: 28px; }
+.site-nav a { font-size: 0.8rem; color: #3A3530; text-decoration: none; }
+.site-page { padding: 40px; }
+.site-page h2 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: #3A3530; margin-bottom: 20px; }
+.mock-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+.mock-card { background: #EDE8E0; border-radius: 8px; height: 220px; }
+.mock-card-label { background: #E0D9D0; height: 10px; border-radius: 4px; margin: 10px 10px 6px; }
+.mock-card-label.short { width: 60%; }
 
-/* ── SIDEBAR ── */
-.sidebar{width:270px;flex-shrink:0;background:linear-gradient(180deg,var(--chrome-2) 0%,var(--chrome-1) 100%);border-right:1px solid var(--edge);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;z-index:50;box-shadow:inset -1px 0 0 rgba(255,255,255,0.04);}
-.sidebar-tabs{display:flex;border-bottom:1px solid var(--edge);background:var(--chrome-1);}
-.stab{flex:1;padding:13px 0;font-family:var(--sans);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;text-align:center;cursor:pointer;color:var(--sheen);transition:color .2s,background .2s;border-bottom:2px solid transparent;}
-.stab:hover{color:var(--bright);background:rgba(255,255,255,.03);}
-.stab.active{color:var(--silver);border-bottom-color:var(--steel);background:rgba(255,255,255,.05);}
-.sidebar-panel{display:none;flex:1;flex-direction:column;overflow:hidden;}
-.sidebar-panel.active{display:flex;}
-.sidebar-list{flex:1;overflow-y:auto;padding:4px 0;}
-.sidebar-list::-webkit-scrollbar{width:3px;}
-.sidebar-list::-webkit-scrollbar-thumb{background:var(--edge);border-radius:2px;}
-.history-item{padding:10px 16px;cursor:pointer;border-left:3px solid transparent;transition:background .15s,border-color .15s;display:flex;flex-direction:column;gap:3px;}
-.history-item:hover{background:rgba(255,255,255,.04);}
-.history-item.active{background:rgba(200,208,219,.06);border-left-color:var(--steel);}
-.hi-date{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--bright);}
-.history-item.today-item .hi-date{color:var(--silver);}
-.hi-meta{font-family:var(--mono);font-size:10px;color:var(--sheen);}
-.hi-tickers{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;}
-.hi-ticker{font-family:var(--mono);font-size:9px;padding:2px 5px;border-radius:3px;background:rgba(255,255,255,.05);color:var(--sheen);border:1px solid var(--chrome-4);}
-.hi-ticker.win{color:var(--green);background:rgba(76,175,125,.1);border-color:var(--green-dim);}
-.hi-ticker.loss{color:var(--red);background:rgba(201,64,64,.1);border-color:var(--red-dim);}
-.sidebar-empty{padding:28px 16px;font-family:var(--mono);font-size:11px;color:var(--sheen);text-align:center;line-height:1.9;}
-.sidebar-foot{padding:10px 14px;border-top:1px solid var(--edge);}
-.clear-btn{font-family:var(--mono);font-size:10px;color:var(--red);background:none;border:1px solid rgba(201,64,64,.25);border-radius:4px;padding:6px 12px;cursor:pointer;width:100%;transition:background .2s;}
-.clear-btn:hover{background:rgba(201,64,64,.08);}
-.perf-section{padding:14px;overflow-y:auto;flex:1;}
-.perf-title{font-family:var(--sans);font-size:11px;font-weight:700;color:var(--sheen);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;}
-.perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
-.perf-box{background:var(--chrome-1);border:1px solid var(--edge);border-radius:6px;padding:10px 12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);}
-.pb-val{font-family:var(--mono);font-size:15px;font-weight:700;display:block;margin-bottom:2px;}
-.pb-lbl{font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.08em;}
-.pb-win{color:var(--green);}.pb-loss{color:var(--red);}.pb-neutral{color:var(--titanium);}
-.trade-log-item{padding:8px 0;border-bottom:1px solid var(--chrome-3);display:flex;align-items:center;gap:8px;}
-.trade-log-item:last-child{border-bottom:none;}
-.tli-ticker{font-family:var(--mono);font-size:12px;font-weight:700;width:52px;flex-shrink:0;}
-.tli-outcome{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px;flex-shrink:0;}
-.tli-win{background:rgba(76,175,125,.12);color:var(--green);border:1px solid var(--green-dim);}
-.tli-loss{background:rgba(201,64,64,.12);color:var(--red);border:1px solid var(--red-dim);}
-.tli-open{background:rgba(74,127,168,.12);color:var(--blue);border:1px solid rgba(74,127,168,.3);}
-.tli-details{flex:1;}
-.tli-pnl{font-family:var(--mono);font-size:11px;font-weight:700;}
-.tli-meta{font-family:var(--mono);font-size:9px;color:var(--sheen);}
-.learn-badge{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:6px;margin-top:12px;background:rgba(168,184,200,.05);border:1px solid var(--edge);}
-.learn-text{font-family:var(--mono);font-size:10px;color:var(--titanium);line-height:1.6;}
+/* ── OVERLAY ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(46,42,38,0.5);
+  backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 100;
+}
+
+/* ── CARD ── */
+.card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(43,38,34,0.12);
+  color-scheme: light;
+}
+.card-body {
+  padding: 14px 20px 20px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  flex: 1;
+  min-height: 0;
+}
+.card-body::-webkit-scrollbar { display: none; }
 
 /* ── HEADER ── */
-.main-content{flex:1;min-width:0;display:flex;flex-direction:column;}
-header{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,var(--chrome-2) 0%,var(--chrome-1) 100%);border-bottom:1px solid var(--edge);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:56px;box-shadow:0 1px 0 rgba(255,255,255,.04),0 2px 12px rgba(0,0,0,.4);}
-.logo-group{display:flex;align-items:baseline;gap:16px;}
-.logo{font-family:var(--sans);font-size:22px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;background:linear-gradient(135deg,var(--sheen) 0%,var(--silver) 40%,var(--white) 55%,var(--silver) 70%,var(--sheen) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5));line-height:1;}
-.tagline{font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:.1em;color:var(--sheen);text-transform:uppercase;}
-@media(max-width:860px){
-  .logo-group{flex-direction:column;gap:2px;align-items:flex-start;}
-  .tagline{font-size:10px;letter-spacing:.08em;}
+.card-head {
+  text-align: center;
+  padding: 28px 32px 20px;
+  border-bottom: 1px solid #F0EBE3;
 }
-.header-right{display:flex;align-items:center;gap:12px;}
-.live-pill{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:3px;background:rgba(76,175,125,.1);color:var(--green);border:1px solid var(--green-dim);letter-spacing:.08em;display:flex;align-items:center;gap:5px;}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:livepulse 2s infinite;}
-@keyframes livepulse{0%,100%{opacity:1;}50%{opacity:.3;}}
-.time-display{font-family:var(--mono);font-size:12px;color:var(--sheen);}
-.fx-display{font-family:var(--mono);font-size:11px;color:var(--sheen);padding:4px 9px;border:1px solid var(--chrome-4);border-radius:3px;background:var(--chrome-1);}
-.history-toggle{font-family:var(--mono);font-size:11px;background:var(--chrome-2);border:1px solid var(--edge);color:var(--sheen);padding:6px 10px;border-radius:4px;cursor:pointer;display:none;}
-
-main{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:24px 24px;width:100%;}
-
-.viewing-banner{display:none;align-items:center;justify-content:space-between;padding:10px 16px;margin-bottom:18px;background:rgba(74,127,168,.08);border:1px solid rgba(74,127,168,.3);border-radius:6px;}
-.viewing-banner.visible{display:flex;}
-.vb-text{font-family:var(--mono);font-size:12px;color:var(--titanium);}
-.back-btn{font-family:var(--mono);font-size:11px;color:var(--silver);background:var(--chrome-3);border:1px solid var(--edge);border-radius:4px;padding:5px 12px;cursor:pointer;transition:background .2s;}
-.back-btn:hover{background:var(--chrome-4);}
-
-/* ── CONTROLS ── */
-.controls-panel{background:linear-gradient(160deg,var(--chrome-2),var(--chrome-3));border:1px solid var(--edge);border-radius:8px;padding:16px 20px;margin-bottom:16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 2px 8px rgba(0,0,0,.3);display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;}
-.control-group{display:flex;flex-direction:column;gap:6px;}
-.ctrl-label{font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.12em;}
-select{background:var(--chrome-1);border:1px solid var(--edge);color:var(--bright);font-family:var(--mono);font-size:12px;padding:7px 10px;border-radius:4px;outline:none;cursor:pointer;transition:border-color .2s;box-shadow:inset 0 1px 3px rgba(0,0,0,.3);-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7585'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
-select:focus{border-color:var(--steel);}
-select option{background:var(--chrome-2);}
-.scan-btn{font-family:var(--sans);font-size:15px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;background:linear-gradient(160deg,var(--chrome-3) 0%,var(--chrome-4) 30%,var(--sheen) 50%,var(--chrome-4) 70%,var(--chrome-3) 100%);color:var(--white);border:1px solid var(--sheen);padding:10px 28px;border-radius:5px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;margin-left:auto;box-shadow:inset 0 1px 0 rgba(255,255,255,.15),inset 0 -1px 0 rgba(0,0,0,.3),0 3px 12px rgba(0,0,0,.4);text-shadow:0 1px 2px rgba(0,0,0,.5);}
-.scan-btn::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);transition:left .4s;}
-.scan-btn:hover::before{left:140%;}
-.scan-btn:hover{border-color:var(--silver);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.5);}
-.scan-btn:active{transform:translateY(1px);}
-.scan-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
-.scan-btn.loading{color:transparent;}
-.scan-btn.loading::after{content:'';position:absolute;inset:0;margin:auto;width:16px;height:16px;border:2px solid var(--sheen);border-top-color:var(--white);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-.cash-bar{background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:6px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;}
-.cash-bar-label{color:var(--sheen);text-transform:uppercase;letter-spacing:.08em;font-size:10px;}
-.fx-rate-text{color:var(--titanium);}
-.cash-input-group{display:flex;align-items:center;gap:6px;margin-left:auto;}
-.cash-input{background:var(--bg);border:1px solid var(--chrome-4);color:var(--bright);font-family:var(--mono);font-size:12px;padding:5px 8px;border-radius:4px;width:85px;outline:none;}
-.cash-input:focus{border-color:var(--steel);}
-
-.status-bar{font-family:var(--mono);font-size:11px;color:var(--sheen);padding:9px 14px;background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:5px;margin-bottom:20px;min-height:34px;display:flex;align-items:center;gap:8px;}
-.status-dot{width:6px;height:6px;border-radius:50%;background:var(--sheen);flex-shrink:0;}
-.status-dot.active{background:var(--green);animation:livepulse 1.5s infinite;}
-.error-msg{font-family:var(--mono);font-size:12px;color:var(--red);padding:10px 14px;background:rgba(201,64,64,.08);border:1px solid var(--red-dim);border-radius:5px;margin-bottom:18px;}
-
-/* ── MACRO PANEL ── */
-.macro-panel{background:linear-gradient(160deg,var(--chrome-2),var(--chrome-1));border:1px solid var(--edge);border-radius:8px;overflow:hidden;margin-bottom:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 2px 8px rgba(0,0,0,.3);}
-.macro-loading{opacity:.5;}
-.macro-header{padding:12px 18px 10px;border-bottom:1px solid var(--chrome-4);cursor:pointer;user-select:none;}
-.macro-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.macro-title{font-family:var(--sans);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--silver);}
-.macro-overall{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;font-weight:700;}
-.macro-ov-sep{color:var(--edge);}
-.macro-filter-note{font-family:var(--mono);font-size:10px;color:var(--sheen);}
-.macro-toggle{font-family:var(--mono);font-size:10px;color:var(--sheen);}
-.macro-body{display:none;}
-.macro-body.open{display:block;}
-.macro-indices{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));}
-.macro-index{padding:12px 18px;border-right:1px solid var(--chrome-4);}
-.macro-index:last-child{border-right:none;}
-.macro-index-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
-.macro-sym{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--bright);}
-.macro-trend{font-family:var(--mono);font-size:11px;}
-.macro-bias-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;border:1px solid;text-transform:uppercase;letter-spacing:.06em;}
-.macro-sr-row{display:flex;align-items:center;margin-bottom:6px;}
-.macro-sr-item{flex:1;text-align:center;}
-.macro-sr-lbl{display:block;font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;}
-.macro-sr-val{display:block;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--bright);}
-.sr-pos{color:var(--titanium)!important;font-size:10px!important;}
-.macro-sr-divider{width:1px;height:24px;background:var(--chrome-4);margin:0 5px;}
-.macro-note{font-family:var(--mono);font-size:10px;color:var(--sheen);}
-
-/* ── TIER ── */
-.tier-section{margin-bottom:8px;}
-.tier-divider{height:1px;background:var(--chrome-3);margin:22px 0;}
-.tier-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.tier-title-group{display:flex;align-items:baseline;gap:10px;}
-.tier-label{font-family:var(--sans);font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--silver);}
-.tier-sublabel{font-family:var(--mono);font-size:10px;color:var(--sheen);}
-.tier-status{font-family:var(--mono);font-size:11px;color:var(--sheen);display:flex;align-items:center;gap:6px;}
-.tier-dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--sheen);}
-.tier-dot.scanning{background:var(--green);animation:livepulse 1s infinite;}
-.tier-dot.done{background:var(--green);}
-.tier-dot.failed{background:var(--red);}
-.tier-error{font-family:var(--mono);font-size:12px;color:var(--red);padding:16px;}
-
-/* ── CARDS ── */
-.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;}
-
-.trade-card{background:linear-gradient(160deg,var(--chrome-2) 0%,var(--chrome-1) 60%,var(--chrome-2) 100%);border:1px solid var(--edge);border-radius:10px;overflow:hidden;transition:border-color .25s,transform .2s,box-shadow .25s;animation:riseUp .5s ease both;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 2px 10px rgba(0,0,0,.35);}
-.trade-card:hover{border-color:var(--sheen);transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 24px rgba(0,0,0,.5);}
-.trade-card.outcome-win{border-color:var(--green-dim);}
-.trade-card.outcome-loss{border-color:var(--red-dim);}
-@keyframes riseUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-
-/* Card header */
-.card-header{padding:14px 16px 12px;border-bottom:1px solid var(--chrome-4);display:flex;align-items:flex-start;justify-content:space-between;background:linear-gradient(180deg,rgba(255,255,255,.04) 0%,transparent 100%);}
-.rank-badge{font-family:var(--mono);font-size:11px;font-weight:700;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--chrome-4),var(--sheen));color:var(--white);flex-shrink:0;margin-top:1px;box-shadow:0 1px 3px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.15);border:1px solid var(--edge);}
-.rank-badge.r2{background:linear-gradient(135deg,var(--chrome-3),var(--steel));}
-.rank-badge.r3{background:linear-gradient(135deg,var(--chrome-3),var(--edge));}
-.stock-info{flex:1;margin:0 12px;}
-.ticker{font-family:var(--sans);font-size:22px;font-weight:700;line-height:1;color:var(--white);letter-spacing:.05em;}
-.company-name{font-size:12px;color:var(--sheen);margin-top:2px;}
-.exchange-tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,.05);color:var(--sheen);margin-top:4px;display:inline-block;border:1px solid var(--chrome-4);}
-.card-badges{display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
-.dir-badge{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 9px;border-radius:3px;letter-spacing:.04em;}
-.long-badge{background:rgba(76,175,125,.1);color:var(--green);border:1px solid var(--green-dim);}
-.short-badge{background:rgba(201,64,64,.1);color:var(--red);border:1px solid var(--red-dim);}
-.pattern-badge{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;}
-.pattern-breakout{background:rgba(76,175,125,.1);color:var(--green);border:1px solid var(--green-dim);}
-.pattern-accumulation{background:rgba(74,127,168,.1);color:var(--blue);border:1px solid rgba(74,127,168,.3);}
-.pattern-momentum{background:rgba(200,136,42,.1);color:var(--amber);border:1px solid rgba(200,136,42,.3);}
-.pattern-short{background:rgba(201,64,64,.1);color:var(--red);border:1px solid var(--red-dim);}
-
-/* ── CARD BODY (FRONT) ── */
-.card-body{padding:14px 16px;}
-
-/* Earnings warning */
-.earnings-warning{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.3);border-radius:6px;margin-bottom:12px;}
-.ew-icon{font-size:16px;}
-.ew-text{font-family:var(--mono);font-size:11px;color:var(--amber);flex:1;}
-.ew-info{font-family:var(--mono);font-size:11px;color:var(--sheen);cursor:pointer;padding:2px 6px;border:1px solid var(--chrome-4);border-radius:3px;}
-
-/* Market trend */
-.market-trend-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:7px 12px;background:var(--bg);border:1px solid var(--chrome-4);border-radius:5px;}
-.mt-icon{font-size:16px;}
-.mt-text{font-family:var(--mono);font-size:11px;flex:1;}
-.mt-info-btn{font-family:var(--mono);font-size:10px;color:var(--sheen);cursor:pointer;padding:2px 6px;border:1px solid var(--chrome-4);border-radius:3px;background:var(--chrome-2);flex-shrink:0;}
-.mt-info-btn:hover{border-color:var(--steel);color:var(--bright);}
-
-/* Price levels */
-.price-levels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;}
-.level-box{background:var(--bg);border:1px solid var(--chrome-4);border-radius:5px;padding:9px 10px;text-align:center;box-shadow:inset 0 1px 3px rgba(0,0,0,.3);}
-.level-label{font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
-.level-value{font-family:var(--mono);font-size:14px;font-weight:700;}
-.level-sublabel{font-family:var(--mono);font-size:8px;color:var(--sheen);margin-top:2px;}
-.level-box.buy .level-value{color:var(--bright);}
-.level-box.target .level-value{color:var(--green);}
-.level-box.stop .level-value{color:var(--red);}
-
-/* Cash estimate */
-.cash-estimate{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
-.cash-box{border-radius:5px;padding:9px 10px;text-align:center;}
-.cash-box.gain-box{background:rgba(76,175,125,.07);border:1px solid var(--green-dim);}
-.cash-box.risk-box{background:rgba(201,64,64,.07);border:1px solid var(--red-dim);}
-.cash-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;}
-.gain-box .cash-lbl{color:var(--green);}
-.risk-box .cash-lbl{color:var(--red);}
-.cash-val{font-family:var(--mono);font-size:15px;font-weight:700;}
-.gain-box .cash-val{color:var(--green);}
-.risk-box .cash-val{color:var(--red);}
-.cash-dual{font-family:var(--mono);font-size:9px;color:var(--sheen);margin-top:2px;}
-
-/* Confidence front */
-.conf-front{margin-bottom:12px;}
-.conf-front-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
-.conf-front-label{font-family:var(--mono);font-size:10px;color:var(--sheen);text-transform:uppercase;letter-spacing:.1em;}
-.conf-front-pct{font-family:var(--mono);font-size:22px;font-weight:700;line-height:1;}
-.conf-front-bar-bg{height:5px;background:var(--chrome-4);border-radius:3px;overflow:hidden;margin-bottom:5px;}
-.conf-front-bar-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1);}
-.conf-front-sub{font-family:var(--mono);font-size:10px;color:var(--sheen);}
-
-/* Thesis */
-.thesis-row{font-family:var(--sans);font-size:13px;color:var(--titanium);padding:0 2px;margin-bottom:12px;line-height:1.5;}
-.thesis-label{font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
-
-/* Track buttons */
-.track-section{border-top:1px solid var(--chrome-4);padding-top:12px;}
-.tracker-title{font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
-.tracker-amount-row{display:flex;gap:6px;margin-bottom:8px;align-items:center;}
-.tracker-amount-row label{font-family:var(--mono);font-size:10px;color:var(--sheen);white-space:nowrap;}
-.tracker-input{background:var(--bg);border:1px solid var(--chrome-4);color:var(--bright);font-family:var(--mono);font-size:12px;padding:6px 8px;border-radius:4px;flex:1;outline:none;min-width:0;}
-.tracker-input:focus{border-color:var(--steel);}
-.tracker-currency{font-family:var(--mono);font-size:11px;color:var(--sheen);padding:6px 8px;background:var(--chrome-2);border:1px solid var(--chrome-4);border-radius:4px;}
-.outcome-buttons{display:flex;gap:6px;margin-bottom:8px;}
-.outcome-btn{flex:1;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 0;border-radius:5px;border:none;cursor:pointer;transition:all .2s;letter-spacing:.04em;}
-.btn-track-open{background:rgba(74,127,168,.15);color:var(--blue);border:1px solid rgba(74,127,168,.3);}
-.btn-track-win{background:rgba(76,175,125,.15);color:var(--green);border:1px solid var(--green-dim);}
-.btn-track-loss{background:rgba(201,64,64,.15);color:var(--red);border:1px solid var(--red-dim);}
-.btn-track-open:hover{background:rgba(74,127,168,.25);}
-.btn-track-win:hover{background:rgba(76,175,125,.25);}
-.btn-track-loss:hover{background:rgba(201,64,64,.25);}
-.outcome-result-row{display:flex;gap:6px;align-items:center;}
-.outcome-result-row label{font-family:var(--mono);font-size:10px;color:var(--sheen);white-space:nowrap;}
-.outcome-recorded{padding:8px 11px;border-radius:5px;font-family:var(--mono);font-size:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.outcome-recorded.win-rec{background:rgba(76,175,125,.1);border:1px solid var(--green-dim);color:var(--green);}
-.outcome-recorded.loss-rec{background:rgba(201,64,64,.1);border:1px solid var(--red-dim);color:var(--red);}
-.outcome-recorded.open-rec{background:rgba(74,127,168,.1);border:1px solid rgba(74,127,168,.3);color:var(--blue);}
-.rec-edit{font-family:var(--mono);font-size:10px;color:var(--sheen);cursor:pointer;text-decoration:underline;}
-
-/* ── MORE DETAIL BUTTON ── */
-.more-detail-btn{width:100%;margin-top:12px;padding:9px 0;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--chrome-2);border:1px solid var(--chrome-4);border-radius:5px;color:var(--sheen);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.more-detail-btn:hover{border-color:var(--steel);color:var(--bright);}
-
-/* ── DETAIL PANEL (slide up) ── */
-.detail-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-end;justify-content:center;}
-.detail-overlay.open{display:flex;}
-.detail-panel{background:linear-gradient(180deg,var(--chrome-2),var(--chrome-1));border:1px solid var(--edge);border-bottom:none;border-radius:14px 14px 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;padding:0;animation:slideUp .3s cubic-bezier(.4,0,.2,1);}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.detail-panel::-webkit-scrollbar{width:3px;}
-.detail-panel::-webkit-scrollbar-thumb{background:var(--edge);border-radius:2px;}
-.detail-handle{width:40px;height:4px;background:var(--edge);border-radius:2px;margin:12px auto 0;}
-.detail-header{padding:16px 20px 12px;border-bottom:1px solid var(--chrome-4);display:flex;align-items:center;justify-content:space-between;}
-.detail-title{font-family:var(--sans);font-size:16px;font-weight:700;letter-spacing:.1em;color:var(--white);}
-.detail-close{font-family:var(--mono);font-size:12px;color:var(--sheen);cursor:pointer;padding:4px 10px;border:1px solid var(--chrome-4);border-radius:4px;background:var(--chrome-3);}
-.detail-body{padding:16px 20px;}
-.detail-section{margin-bottom:18px;}
-.detail-section-title{font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--chrome-4);}
-.detail-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.detail-row:last-child{border-bottom:none;}
-.detail-key{font-family:var(--mono);font-size:11px;color:var(--sheen);}
-.detail-val{font-family:var(--mono);font-size:11px;color:var(--bright);font-weight:700;}
-.detail-chips{display:flex;flex-wrap:wrap;gap:5px;}
-.detail-chip{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;background:var(--chrome-2);border:1px solid var(--chrome-4);color:var(--titanium);}
-.detail-chip.highlight{color:var(--silver);border-color:var(--edge);}
-.detail-text{font-family:var(--mono);font-size:11px;color:var(--titanium);line-height:1.6;}
-.detail-bar-row{margin-top:6px;}
-.detail-bar-bg{height:5px;background:var(--chrome-4);border-radius:3px;overflow:hidden;margin-top:6px;}
-.detail-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--steel),var(--silver));transition:width 1s cubic-bezier(.4,0,.2,1);}
-.mood-badge{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:4px;font-weight:700;}
-.mood-positive{background:rgba(76,175,125,.1);color:var(--green);border:1px solid var(--green-dim);}
-.mood-neutral{background:rgba(106,117,133,.1);color:var(--sheen);border:1px solid var(--edge);}
-.mood-negative{background:rgba(201,64,64,.1);color:var(--red);border:1px solid var(--red-dim);}
-.sr-detail-row{padding:8px 12px;background:var(--bg);border:1px solid var(--chrome-4);border-radius:5px;margin-bottom:8px;}
-.sr-detail-text{font-family:var(--mono);font-size:11px;color:var(--bright);line-height:1.5;margin-bottom:6px;}
-.sr-levels-row{display:flex;gap:6px;}
-.sr-lv{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:3px;font-weight:700;}
-.sr-lv.sup{background:rgba(76,175,125,.1);color:var(--green);border:1px solid var(--green-dim);}
-.sr-lv.res{background:rgba(201,64,64,.1);color:var(--red);border:1px solid var(--red-dim);}
-
-/* ── TOOLTIP ── */
-.tooltip-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;align-items:center;justify-content:center;padding:20px;}
-.tooltip-overlay.open{display:flex;}
-.tooltip-box{background:linear-gradient(160deg,var(--chrome-3),var(--chrome-2));border:1px solid var(--edge);border-radius:10px;padding:20px 22px;max-width:360px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.5);}
-.tooltip-title{font-family:var(--sans);font-size:16px;font-weight:700;color:var(--white);margin-bottom:10px;letter-spacing:.05em;}
-.tooltip-text{font-family:var(--mono);font-size:12px;color:var(--titanium);line-height:1.8;}
-.tooltip-close{margin-top:16px;width:100%;padding:9px 0;font-family:var(--mono);font-size:12px;background:var(--chrome-4);border:1px solid var(--edge);border-radius:5px;color:var(--bright);cursor:pointer;}
-
-/* ── TIER CHECKBOXES ── */
-.tier-select-panel{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:6px;margin-bottom:14px;flex-wrap:nowrap;overflow-x:auto;}
-.tier-select-panel::-webkit-scrollbar{display:none;}
-.tier-check{display:flex;align-items:center;gap:7px;cursor:pointer;padding:6px 12px;border-radius:5px;border:1px solid var(--chrome-4);background:var(--chrome-2);transition:border-color .2s,background .2s;user-select:none;flex:1;justify-content:center;}
-.tier-check:hover{border-color:var(--edge);}
-.tier-check input[type="checkbox"],.tier-check input[type="radio"]{width:15px;height:15px;accent-color:var(--green);cursor:pointer;flex-shrink:0;}
-.tier-check input[type="checkbox"]:checked~.tier-check-label,.tier-check input[type="radio"]:checked~.tier-check-label{color:var(--bright);}
-.tier-check:has(input:checked){border-color:var(--steel);background:rgba(122,143,166,.08);}
-.tier-check-label{font-family:var(--mono);font-size:11px;color:var(--sheen);display:flex;align-items:center;gap:6px;white-space:nowrap;}
-.tier-check-sub{font-size:9px;color:var(--sheen);opacity:.7;}
-
-/* ── COOLDOWN BAR ── */
-.cooldown-bar{display:none;align-items:center;gap:12px;padding:10px 16px;background:rgba(200,136,42,.07);border:1px solid rgba(200,136,42,.25);border-radius:6px;margin-bottom:14px;}
-.cooldown-bar.visible{display:flex;}
-.cooldown-text{font-family:var(--mono);font-size:11px;color:var(--amber);flex:1;}
-.cooldown-timer{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--amber);flex-shrink:0;}
-.cooldown-track{flex:1;height:4px;background:var(--chrome-4);border-radius:2px;overflow:hidden;}
-.cooldown-fill{height:100%;background:var(--amber);border-radius:2px;transition:width 1s linear;}
-
-/* ── MODE TOGGLE ── */
-.mode-toggle{display:flex;align-items:center;background:var(--chrome-1);border:1px solid var(--edge);border-radius:5px;overflow:hidden;}
-.mode-btn{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;background:none;border:none;color:var(--sheen);cursor:pointer;transition:all .2s;}
-.mode-btn:hover{color:var(--bright);}
-#modeSimple.active{background:rgba(74,127,168,.25);color:#7ab8e8;border-right:1px solid var(--edge);}
-#modeTrader.active{background:rgba(200,136,42,.2);color:var(--amber);}
-#modeSimple:not(.active){border-right:1px solid var(--edge);}
-
-/* ── INTRO PROMPT ── */
-.intro-prompt{font-family:var(--sans);font-size:15px;font-weight:500;color:var(--titanium);margin-bottom:16px;padding:12px 16px;border-left:3px solid var(--steel);background:rgba(255,255,255,.02);}
-.intro-prompt strong{color:var(--silver);}
-
-/* ── HOW IT WORKS ── */
-.how-it-works{background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:6px;margin-bottom:14px;overflow:hidden;}
-.hiw-toggle{width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;background:none;border:none;cursor:pointer;text-align:left;transition:background .2s;}
-.hiw-toggle:hover{background:rgba(255,255,255,.03);}
-.hiw-toggle-icon{font-family:var(--mono);font-size:10px;color:var(--sheen);transition:transform .2s;display:inline-block;}
-.hiw-toggle-label{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--titanium);text-transform:uppercase;}
-.hiw-body{padding:0 16px 16px;border-top:1px solid var(--chrome-4);}
-.hiw-step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.hiw-step:last-child{border-bottom:none;padding-bottom:0;}
-.hiw-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--steel);background:var(--chrome-2);border:1px solid var(--chrome-4);border-radius:4px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
-.hiw-icon{font-size:18px;flex-shrink:0;margin-top:1px;width:24px;text-align:center;}
-.hiw-step-content{}
-.hiw-step-title{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--bright);margin-bottom:4px;letter-spacing:.04em;}
-.hiw-step-desc{font-family:var(--mono);font-size:11px;color:var(--sheen);line-height:1.7;}
-.hiw-limitations{margin-top:14px;padding:10px 14px;background:rgba(200,136,42,.06);border:1px solid rgba(200,136,42,.2);border-radius:5px;}
-.hiw-lim-title{font-family:var(--mono);font-size:10px;color:var(--amber);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
-.hiw-lim-text{font-family:var(--mono);font-size:10px;color:var(--sheen);line-height:1.7;}
-
-/* ── PAGE FOOTER ── */
-.page-footer{text-align:center;padding:40px 0 20px;border-top:1px solid var(--chrome-3);margin-top:40px;}
-.footer-legal{font-family:var(--mono);font-size:10px;color:var(--sheen);line-height:1.7;max-width:600px;margin:16px auto 0;}
-.footer-symbol{font-size:36px;color:var(--chrome-4);margin-bottom:6px;line-height:1;}
-.footer-name{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--chrome-4);}
-
-/* ── LOADING PANEL ── */
-.loading-panel{background:var(--chrome-1);border:1px solid var(--chrome-4);border-radius:8px;padding:16px 18px;margin-bottom:20px;}
-.loading-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
-.loading-step{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;}
-.step-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;border:1px solid var(--chrome-4);}
-.step-icon.pending{background:var(--chrome-3);color:var(--sheen);}
-.step-icon.active{background:rgba(76,175,125,.15);border-color:var(--green-dim);color:var(--green);animation:livepulse 1s infinite;}
-.step-icon.done{background:rgba(76,175,125,.2);border-color:var(--green-dim);color:var(--green);}
-.step-icon.waiting{background:rgba(200,136,42,.15);border-color:rgba(200,136,42,.3);color:var(--amber);}
-.step-icon.failed{background:rgba(201,64,64,.15);border-color:var(--red-dim);color:var(--red);}
-.step-label{flex:1;color:var(--sheen);}
-.step-label.active{color:var(--bright);}
-.step-label.done{color:var(--sheen);text-decoration:none;}
-.step-countdown{font-family:var(--mono);font-size:10px;color:var(--amber);min-width:40px;text-align:right;}
-.loading-tip-box{border-top:1px solid var(--chrome-4);padding-top:12px;}
-.loading-tip-label{font-family:var(--mono);font-size:9px;color:var(--sheen);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px;}
-.loading-tip-text{font-family:var(--sans);font-size:14px;color:var(--titanium);line-height:1.6;font-style:italic;transition:opacity .5s;}
-.loading-tip-text.fading{opacity:0;}
-
-/* ── SKELETON ── */
-.skeleton{pointer-events:none;min-height:90px;}
-.skel-line{height:10px;border-radius:3px;margin-bottom:9px;background:linear-gradient(90deg,var(--chrome-2) 25%,var(--chrome-3) 50%,var(--chrome-2) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;}
-.skel-line.w60{width:60%}.skel-line.w40{width:40%}.skel-line.w80{width:80%}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-.empty-state{text-align:center;padding:36px 30px;color:var(--sheen);}
-.empty-icon{font-size:52px;margin-bottom:16px;opacity:.3;background:linear-gradient(135deg,var(--sheen),var(--silver));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.empty-title{font-family:var(--sans);font-size:18px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--bright);margin-bottom:8px;}
-.empty-sub{font-family:var(--mono);font-size:11px;color:var(--sheen);line-height:1.8;}
-
-.disclaimer{margin-top:0;margin-bottom:14px;padding:14px 18px;border:1px solid var(--chrome-4);border-radius:6px;background:var(--chrome-1);}
-.disclaimer-price{font-family:var(--mono);font-size:12px;color:var(--titanium);line-height:1.6;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--chrome-4);}
-.disclaimer-price strong{color:var(--bright);}
-.disclaimer-legal{font-family:var(--mono);font-size:10px;color:var(--sheen);line-height:1.6;}
-
-.save-toast{position:fixed;bottom:22px;right:22px;z-index:400;font-family:var(--mono);font-size:12px;background:linear-gradient(135deg,var(--chrome-3),var(--chrome-4));color:var(--silver);border:1px solid var(--sheen);padding:10px 18px;border-radius:5px;transform:translateY(60px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.5);}
-.save-toast.show{transform:translateY(0);opacity:1;}
-
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:45;}
-.sidebar-overlay.visible{display:block;}
-
-@media(max-width:860px){
-  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .3s;}
-  .sidebar.open{transform:translateX(0);box-shadow:4px 0 28px rgba(0,0,0,.7);}
-  .history-toggle{display:flex!important;align-items:center;}
-  .controls-panel{flex-direction:column;align-items:stretch;}
-  .control-group{width:100%;}
-  select{width:100%;font-size:14px;padding:9px 10px;}
-  .scan-btn{margin-left:0;width:100%;font-size:16px;}
-  .tier-select-panel{flex-wrap:wrap!important;overflow-x:visible!important;}
-  .tier-check{flex:1 1 calc(50% - 4px);min-width:120px;}
-  .results-grid{grid-template-columns:1fr;}
-  header{padding:0 14px;height:68px;}
-  main{padding:16px 14px;}
-  .macro-indices{grid-template-columns:1fr;}
-  .macro-index{border-right:none;border-bottom:1px solid var(--chrome-4);}
-  .macro-index:last-child{border-bottom:none;}
-  .detail-panel{max-height:90vh;}
-  /* Larger text on mobile cards */
-  .ticker{font-size:26px;}
-  .company-name{font-size:14px;}
-  .level-label{font-size:10px;}
-  .level-value{font-size:16px;}
-  .cash-lbl{font-size:10px;}
-  .cash-val{font-size:17px;}
-  .cash-dual{font-size:10px;}
-  .conf-front-pct{font-size:26px;}
-  .conf-front-label{font-size:11px;}
-  .conf-front-sub{font-size:11px;}
-  .thesis-row{font-size:15px;}
-  .thesis-label{font-size:10px;}
-  .mt-text{font-size:13px;}
-  .outcome-btn{font-size:13px;padding:10px 0;}
-  .more-detail-btn{font-size:13px;padding:11px 0;}
+.logo {
+  width: 44px; height: 44px;
+  background: #5BB5A2; border-radius: 50%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: white; margin: 0 auto 14px;
 }
+.logo-my  { font-size: 0.9rem; font-weight: 500; line-height: 1; }
+.logo-sub { font-size: 0.42rem; font-weight: 300; letter-spacing: 0.05em; line-height: 1.3; }
+.card-head h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight: 400;
+  color: #2E2A26; line-height: 1.2;
+}
+.card-head h2 em { font-style: italic; }
+
+/* ── PROGRESS ── */
+.progress-track { height: 3px; background: #F0EBE3; }
+.progress-fill  { height: 100%; background: #5BB5A2; transition: width 0.4s ease; width: 0%; }
+.progress-label {
+  text-align: center; font-size: 0.65rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #B0A8A0; padding: 9px 0 0;
+  font-weight: 500;
+}
+
+
+
+/* ── STEPS ── */
+.step { display: none; }
+.step.active { display: block; animation: stepIn 0.25s ease; }
+@keyframes stepIn { from { opacity:0; transform:translateX(8px); } to { opacity:1; transform:translateX(0); } }
+
+.btn-back {
+  background: none; border: none; padding: 0 0 11px;
+  cursor: pointer; font-size: 0.72rem; font-family: 'DM Sans', sans-serif;
+  color: #C0B8B0; display: block; transition: color 0.15s;
+}
+.btn-back:hover { color: #5BB5A2; }
+
+.step-q {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem; font-weight: 400;
+  color: #2E2A26; margin-bottom: 14px; line-height: 1.3;
+}
+
+/* ── OPTIONS ── */
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.options.flex { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt {
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  background: #FAF8F5; border: 1.5px solid #E8E2D8;
+  border-radius: 50px; padding: 10px 12px;
+  cursor: pointer; font-size: 0.8rem; font-weight: 400;
+  color: #3A3530; transition: all 0.18s;
+  font-family: 'DM Sans', sans-serif; text-align: center;
+  -webkit-appearance: none; appearance: none;
+}
+/* Grid opts fill their column; flex opts size to content */
+.options:not(.flex) .opt { width: 100%; }
+.options.flex .opt { padding: 8px 14px; font-size: 0.78rem; }
+.opt:hover { border-color: #5BB5A2; background: #F0FAF8; }
+.opt.sel   { background: #5BB5A2; border-color: #5BB5A2; color: white; }
+.opt-icon  { font-size: 0.95rem; flex-shrink: 0; }
+
+/* ── RESULTS ── */
+#step-results { display: none; }
+#step-results.active { display: block; animation: stepIn 0.25s ease; }
+
+/* Curated context line */
+.results-context {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem; font-style: italic;
+  color: #5BB5A2; margin-bottom: 3px; line-height: 1.35;
+}
+.results-sub {
+  font-size: 0.74rem; color: #9A9088; font-weight: 300;
+  margin-bottom: 10px; line-height: 1.5;
+}
+
+/* Trust bar */
+.trust-bar {
+  display: flex; align-items: center; gap: 6px;
+  background: #FAF8F5; border-radius: 8px;
+  padding: 7px 10px; margin-bottom: 10px;
+}
+.trust-stars { color: #F4A535; font-size: 0.7rem; letter-spacing: 0.05em; }
+.trust-text  { font-size: 0.68rem; color: #9A9088; font-weight: 300; }
+.trust-text strong { color: #2E2A26; font-weight: 500; }
+
+/* ── EMAIL TOP ── */
+.email-top {
+  background: #EBF4F2; border: 1px solid #C8E6DE;
+  border-radius: 10px; padding: 10px 12px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.email-top-text { flex: 1; }
+.email-top-text strong { font-size: 0.76rem; font-weight: 500; color: #2E2A26; display: block; margin-bottom: 1px; }
+.email-top-text span   { font-size: 0.68rem; color: #6A9A8E; }
+.email-top-btn {
+  background: #5BB5A2; color: white; border: none;
+  border-radius: 50px; padding: 8px 14px;
+  font-size: 0.72rem; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer;
+  white-space: nowrap; transition: background 0.15s; flex-shrink: 0;
+}
+.email-top-btn:hover { background: #4AA391; }
+
+/* ── TIERS ── */
+.tier-section { margin-bottom: 10px; }
+.tier-label {
+  font-size: 0.64rem; font-weight: 500; letter-spacing: 0.13em;
+  text-transform: uppercase; color: #9A9088;
+  margin-bottom: 6px; padding-bottom: 5px;
+  border-bottom: 1px solid #EDE8E0;
+}
+.prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+/* ── PRODUCT CARD ── */
+.prod-card {
+  background: white; border: 1px solid #EDE8E0;
+  border-radius: 10px; overflow: hidden;
+  text-decoration: none; color: inherit; display: block;
+  transition: all 0.2s; position: relative;
+}
+.prod-card:hover { border-color: #5BB5A2; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(91,181,162,0.15); }
+
+/* Staff pick / popular badge */
+.prod-badge {
+  position: absolute; top: 6px; left: 6px; z-index: 2;
+  background: #2E2A26; color: white;
+  font-size: 0.54rem; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 3px 7px; border-radius: 50px;
+}
+
+.prod-swatch { width: 100%; padding-top: 90%; position: relative; }
+.prod-swatch-inner {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem;
+}
+.prod-body { padding: 7px 9px 9px; }
+.prod-tag  { font-size: 0.58rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #5BB5A2; display: block; margin-bottom: 3px; }
+.prod-name { font-family: 'Cormorant Garamond', serif; font-size: 0.86rem; color: #2E2A26; line-height: 1.3; margin-bottom: 4px; }
+.prod-foot { display: flex; justify-content: space-between; align-items: center; font-size: 0.74rem; font-weight: 500; color: #2E2A26; }
+.prod-gift { font-size: 0.58rem; color: #5BB5A2; font-weight: 400; }
+
+/* ── EMAIL BOTTOM ── */
+.email-panel {
+  background: #F5F0E8; border-radius: 12px;
+  padding: 14px; text-align: center;
+  border: 1px solid #EDE8E0; margin-top: 4px;
+}
+.email-panel h4 { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 400; color: #2E2A26; margin-bottom: 4px; }
+.email-panel p  { font-size: 0.73rem; color: #9A9088; font-weight: 300; margin-bottom: 10px; line-height: 1.5; }
+.email-inp {
+  width: 100%; border: 1.5px solid #DDD8D0; border-radius: 50px;
+  padding: 10px 16px; font-size: 0.8rem;
+  font-family: 'DM Sans', sans-serif; color: #2E2A26;
+  background: white; outline: none; transition: border 0.15s;
+  margin-bottom: 8px; display: block;
+}
+.email-inp:focus { border-color: #5BB5A2; }
+.email-inp::placeholder { color: #C0B8B0; }
+.email-sub {
+  width: 100%; background: #5BB5A2; color: white; border: none;
+  border-radius: 50px; padding: 11px;
+  font-size: 0.8rem; font-weight: 500;
+  font-family: 'DM Sans', sans-serif; cursor: pointer;
+  transition: background 0.15s; display: block;
+}
+.email-sub:hover { background: #4AA391; }
+#emailConfirm { color: #5BB5A2; font-weight: 500; display: none; margin-top: 8px; font-size: 0.76rem; }
+
+.restart-link {
+  display: block; text-align: center; margin-top: 12px;
+  font-size: 0.72rem; color: #C0B8B0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.restart-link:hover { color: #5BB5A2; }
 </style>
 </head>
 <body>
 
-<!-- TOOLTIP -->
-<div class="tooltip-overlay" id="tooltipOverlay" onclick="closeTooltip()">
-  <div class="tooltip-box" onclick="event.stopPropagation()">
-    <div class="tooltip-title" id="tooltipTitle"></div>
-    <div class="tooltip-text" id="tooltipText"></div>
-    <button class="tooltip-close" onclick="closeTooltip()">Got it</button>
+<!-- Mock site background -->
+<div class="site-bar">Free Luxury Gift Box on all orders &nbsp;·&nbsp; Next Day Delivery available &nbsp;·&nbsp; Personalisation, it's kind of our thing</div>
+<div class="site-header">
+  <div class="site-logo-circle"><span class="site-logo-my">MY</span><span class="site-logo-sub">1st years</span></div>
+  <div class="site-nav"><a href="#">Baby</a><a href="#">Kids</a><a href="#">Gift Sets</a><a href="#">Occasions</a><a href="#">Sale</a></div>
+</div>
+<div class="site-page">
+  <h2>Personalised Gifts for Babies &amp; Kids</h2>
+  <div class="mock-grid">
+    <div class="mock-card"><div class="mock-card-label"></div><div class="mock-card-label short"></div></div>
+    <div class="mock-card"><div class="mock-card-label"></div><div class="mock-card-label short"></div></div>
+    <div class="mock-card"><div class="mock-card-label"></div><div class="mock-card-label short"></div></div>
+    <div class="mock-card"><div class="mock-card-label"></div><div class="mock-card-label short"></div></div>
   </div>
 </div>
 
-<!-- DETAIL PANEL -->
-<div class="detail-overlay" id="detailOverlay" onclick="closeDetail()">
-  <div class="detail-panel" onclick="event.stopPropagation()">
-    <div class="detail-handle"></div>
-    <div class="detail-header">
-      <div class="detail-title" id="detailTitle"></div>
-      <button class="detail-close" onclick="closeDetail()">✕ Close</button>
-    </div>
-    <div class="detail-body" id="detailBody"></div>
+<!-- Overlay with gift finder card -->
+<div class="overlay">
+<div class="card">
+
+  <div class="card-head">
+    <div class="logo"><span class="logo-my">MY</span><span class="logo-sub">1st years</span></div>
+    <h2>Find the <em>perfect</em> gift</h2>
   </div>
-</div>
 
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">Step 1 of 3</div>
 
-<div class="app-shell">
-<aside class="sidebar" id="sidebar">
-  <div class="sidebar-tabs">
-    <div class="stab active" onclick="switchTab('history')">History</div>
-    <div class="stab" onclick="switchTab('performance')">Performance</div>
+  <div class="card-body">
+
+    <!-- Step 1 -->
+    <div class="step active" id="step-0">
+      <div class="step-q">Who is the gift for?</div>
+      <div class="options">
+        <button class="opt" data-step="0" data-value="newborn" style="grid-column:1/-1">Newborn <small style="opacity:.5;font-size:.68rem;margin-left:2px">0–3m</small></button>
+        <button class="opt" data-step="0" data-value="baby">Baby <small style="opacity:.5;font-size:.68rem;margin-left:2px">4–12m</small></button>
+        <button class="opt" data-step="0" data-value="toddler">Toddler <small style="opacity:.5;font-size:.68rem;margin-left:2px">1–2 yrs</small></button>
+        <button class="opt" data-step="0" data-value="child">Little One <small style="opacity:.5;font-size:.68rem;margin-left:2px">3–5 yrs</small></button>
+        <button class="opt" data-step="0" data-value="older">Big Kid <small style="opacity:.5;font-size:.68rem;margin-left:2px">6+ yrs</small></button>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step" id="step-1">
+      <button class="btn-back" onclick="goToStep(0)">← Back</button>
+      <div class="step-q">What's your relationship to them?</div>
+      <div class="options">
+        <button class="opt" data-step="1" data-value="parent">Parent</button>
+        <button class="opt" data-step="1" data-value="grandparent">Grandparent</button>
+        <button class="opt" data-step="1" data-value="aunt-uncle">Aunt / Uncle</button>
+        <button class="opt" data-step="1" data-value="godparent">Godparent</button>
+        <button class="opt" data-step="1" data-value="friend">Friend</button>
+        <button class="opt" data-step="1" data-value="other">Other</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Occasion -->
+    <div class="step" id="step-2">
+      <button class="btn-back" onclick="goToStep(1)">← Back</button>
+      <div class="step-q">What's the occasion?</div>
+      <div class="options" id="occasionOptions"></div>
+    </div>
+
+    <!-- Results -->
+    <div id="step-results">
+      <div class="results-context" id="resultsContext"></div>
+      <div class="results-sub" id="resultsSub"></div>
+
+      <div class="trust-bar">
+        <span class="trust-stars">★★★★★</span>
+        <span class="trust-text"><strong>Rated 4.8</strong> · Loved by 500,000+ families · Free luxury gift box on every order</span>
+      </div>
+
+      <div class="email-top">
+        <div class="email-top-text">
+          <strong id="emailTopTitle">Get gift inspiration in your inbox</strong>
+          <span id="emailTopSub">Ideas, edits &amp; exclusive offers</span>
+        </div>
+        <button class="email-top-btn" onclick="focusEmail()">Get Ideas</button>
+      </div>
+
+      <div class="tier-section"><div class="tier-label">Under £30</div><div class="prod-grid" id="gridLow"></div></div>
+      <div class="tier-section"><div class="tier-label">£30–£65</div><div class="prod-grid" id="gridMid"></div></div>
+      <div class="tier-section"><div class="tier-label">£65+</div><div class="prod-grid" id="gridHigh"></div></div>
+
+      <div class="email-panel">
+        <h4>Get more inspiration</h4>
+        <p id="emailPanelSub">We'll send personalised gift ideas, seasonal edits and exclusive offers to your inbox.</p>
+        <input class="email-inp" type="email" id="emailInp" placeholder="Your email address">
+        <button class="email-sub" onclick="submitEmail()">Get Gift Ideas</button>
+        <div id="emailConfirm">You're on the list! Something lovely is on its way.</div>
+      </div>
+
+      <span class="restart-link" onclick="restart()">Not quite right? Start again</span>
+    </div>
+
   </div>
-  <div class="sidebar-panel active" id="panel-history">
-    <div class="sidebar-list" id="historyList"><div class="sidebar-empty">No scans yet.<br>Run your first scan.</div></div>
-    <div class="sidebar-foot"><button class="clear-btn" onclick="confirmClear()">Clear History</button></div>
-  </div>
-  <div class="sidebar-panel" id="panel-performance">
-    <div class="perf-section">
-      <div class="perf-title">Overall Performance</div>
-      <div class="perf-grid">
-        <div class="perf-box"><span class="pb-val pb-neutral" id="pf-total">0</span><span class="pb-lbl">Trades</span></div>
-        <div class="perf-box"><span class="pb-val pb-win" id="pf-winrate">—</span><span class="pb-lbl">Win Rate</span></div>
-        <div class="perf-box"><span class="pb-val pb-win" id="pf-pnl">£0</span><span class="pb-lbl">Total P&amp;L</span></div>
-        <div class="perf-box"><span class="pb-val pb-neutral" id="pf-open">0</span><span class="pb-lbl">Open</span></div>
-      </div>
-      <div class="perf-title">By Pattern</div>
-      <div id="setupBreakdown" style="margin-bottom:14px;"></div>
-      <div class="perf-title">Recent Trades</div>
-      <div id="tradeLog"></div>
-      <div class="learn-badge" id="learnBadge" style="display:none;"><span>⚙</span><span class="learn-text" id="learnText"></span></div>
-    </div>
-    <div class="sidebar-foot"><button class="clear-btn" onclick="confirmClearTrades()">Clear Trade Log</button></div>
-  </div>
-</aside>
-
-<div class="main-content">
-  <header>
-    <div class="logo-group">
-      <div class="logo">TaoScan</div>
-      <div class="tagline">The market speaks. Are you listening?</div>
-    </div>
-    <div class="header-right">
-      <button class="history-toggle" id="historyToggle" onclick="toggleSidebar()">☰</button>
-      <div class="mode-toggle">
-        <button class="mode-btn active" id="modeSimple" onclick="setMode('simple')">Beginner</button>
-        <button class="mode-btn" id="modeTrader" onclick="setMode('trader')">Trader</button>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <div class="viewing-banner" id="viewingBanner">
-      <span class="vb-text" id="viewingLabel">Viewing historical scan</span>
-      <button class="back-btn" onclick="backToLive()">↩ Back to Today</button>
-    </div>
-
-    <div class="intro-prompt">
-      Every day the market leaves clues. Set your filters and find them.
-    </div>
-
-    <div class="cash-bar">
-      <span class="cash-bar-label">Cash per trade</span>
-      <input class="cash-input" id="cashInput" type="number" value="1000" min="1" oninput="refreshCashEstimates()">
-      <select id="cashCurrency" class="cash-input" style="width:64px;" onchange="refreshCashEstimates()">
-        <option value="GBP" selected>GBP</option>
-        <option value="USD">USD</option>
-      </select>
-    </div>
-
-    <div class="controls-panel" id="controlsBar">
-      <div class="control-group">
-        <span class="ctrl-label">Pattern</span>
-        <select id="setupSelect">
-          <option value="all">All Patterns</option>
-          <option value="breakout">Breakout</option>
-          <option value="accumulation">Buying Opportunity</option>
-          <option value="momentum">Trending Move</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <span class="ctrl-label">Min Reward/Risk</span>
-        <select id="rrSelect">
-          <option value="1.5">1.5×</option>
-          <option value="2" selected>2×</option>
-          <option value="3">3×</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <span class="ctrl-label">Direction</span>
-        <select id="directionSelect">
-          <option value="long" selected>↑ Buy (Long)</option>
-          <option value="short">↓ Sell Short</option>
-          <option value="both">↕ Both</option>
-        </select>
-      </div>
-      <div style="flex-basis:100%;height:1px;background:var(--chrome-4);margin:4px 0;"></div>
-      <div class="tier-select-panel" style="margin-bottom:0;border:none;background:none;padding:0;flex:1;min-width:0;">
-        <span class="ctrl-label" style="flex-shrink:0;">Company Size</span>
-        <label class="tier-check"><input type="radio" name="tierSelect" id="tierAny" checked> <span class="tier-check-label">Any</span></label>
-        <label class="tier-check"><input type="radio" name="tierSelect" id="tierLarge"> <span class="tier-check-label">Large Companies</span></label>
-        <label class="tier-check"><input type="radio" name="tierSelect" id="tierMid"> <span class="tier-check-label">Mid-Size</span></label>
-        <label class="tier-check"><input type="radio" name="tierSelect" id="tierSmall"> <span class="tier-check-label">Smaller Companies</span></label>
-      </div>
-      <button class="scan-btn" id="scanBtn" onclick="runScan()">▶ SCAN</button>
-    </div>
-
-    <div class="cooldown-bar" id="cooldownBar">
-      <span class="cooldown-text">⏳ Next scan available in</span>
-      <div class="cooldown-track"><div class="cooldown-fill" id="cooldownFill" style="width:100%"></div></div>
-      <span class="cooldown-timer" id="cooldownTimer">5:00</span>
-    </div>
-
-    <div class="disclaimer">
-      <div class="disclaimer-price">📊 Prices shown are <strong>previous trading day's closing prices</strong> from Polygon.io. During market hours this is yesterday's close. After 9pm BST the current day's close may not yet be available. Always verify the current price before entering any trade.</div>
-    </div>
-
-    <div class="how-it-works" id="howItWorks">
-      <button class="hiw-toggle" onclick="toggleHIW()">
-        <span class="hiw-toggle-icon" id="hiwIcon">▶</span>
-        <span class="hiw-toggle-label">How does TaoScan find trades?</span>
-      </button>
-      <div class="hiw-body" id="hiwBody" style="display:none;">
-        <div id="hiwContent"></div>
-      </div>
-    </div>
-
-    <div class="status-bar" id="statusBar" style="display:none;">
-      <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">Ready</span>
-    </div>
-    <div id="errorMsg" class="error-msg" style="display:none;"></div>
-
-    <!-- LOADING TIPS PANEL -->
-    <div class="loading-panel" id="loadingPanel" style="display:none;">
-      <div class="loading-steps" id="loadingSteps"></div>
-      <div class="loading-tip-box">
-        <div class="loading-tip-label">💡 While you wait</div>
-        <div class="loading-tip-text" id="loadingTip"></div>
-      </div>
-    </div>
-
-    <div id="resultsArea"></div>
-
-    <div class="page-footer">
-      <div class="footer-symbol">道</div>
-      <div class="footer-name">TaoScan</div>
-      <div class="footer-legal">⚠ For informational purposes only. Not financial advice. Always do your own research. Trading involves significant risk of capital loss. S/R levels and trade analysis are AI-generated estimates.</div>
-    </div>
-
-  </main>
-</div>
-</div>
-
-<div class="save-toast" id="saveToast"></div>
+</div><!-- /card -->
+</div><!-- /overlay -->
 
 <script>
-const PROXY_URL = 'https://taoscan-worker.waddellb.workers.dev';
+var answers = {};
 
-// ── TOOLTIPS ──────────────────────────────────────────────────────────────────
-const TOOLTIPS = {
-  edge: {
-    title: 'What is Edge Score?',
-    text: 'The Edge Score tells you whether this trade has a statistical advantage.\n\nIt combines two things: how often this type of trade wins historically, and how much you stand to gain vs lose.\n\nGreen = strong advantage over many trades.\nAmber = slight advantage, proceed with caution.\nRed = avoid — the numbers don\'t favour this trade.'
-  },
-  rr: {
-    title: 'What is Reward/Risk?',
-    text: 'For every $1 you risk, how much could you make.\n\nExample: A 2× reward/risk means if your stop loss is $50 away, your profit target is $100 away.\n\nHigher is better. We only recommend trades with at least 2× reward/risk.'
-  },
-  stop: {
-    title: 'What is "Get out if"?',
-    text: 'This is your stop loss — the price where you sell automatically to cut your losses.\n\nIf the stock drops to this level, the trade idea was wrong and it\'s better to take a small loss than let it get bigger.\n\nAlways set a stop loss before you enter a trade.'
-  },
-  breakout: {
-    title: 'What is a Breakout?',
-    text: 'The stock has been trading in a tight range for a while — like a coiled spring.\n\nA breakout happens when it pushes above that range on strong trading volume, which often leads to a fast upward move.\n\nThink of a dam finally breaking — the water (buying pressure) has been building up and is now released.'
-  },
-  accumulation: {
-    title: 'What is a Buying Opportunity?',
-    text: 'The stock has been falling or flat, but smart money appears to be quietly buying it at these lower prices.\n\nYou can see this in the price stabilising and volume picking up at support levels.\n\nThe idea is to buy alongside the institutions before the stock moves up.'
-  },
-  momentum: {
-    title: 'What is a Trending Move?',
-    text: 'The stock is already in a strong uptrend and has just pulled back slightly before continuing higher.\n\nInstead of buying at the bottom, you\'re buying into an already proven trend at a small dip.\n\nThink of jumping on a moving train rather than waiting at the station.'
-  },
-  distribution: {
-    title: 'What is Selling Pressure?',
-    text: 'Smart money appears to be quietly selling this stock at higher prices — the opposite of accumulation.\n\nThis is a bearish (short) signal. The stock may look fine on the surface but the underlying selling suggests a drop is coming.'
-  },
-  breakdown: {
-    title: 'What is a Breakdown?',
-    text: 'The opposite of a breakout. The stock has dropped below an important support level on strong volume.\n\nThis is a bearish (short) signal — the buying support that was holding the stock up has given way, and further falls are likely.'
-  },
-  earnings: {
-    title: 'Why does Earnings matter?',
-    text: 'Companies report their financial results (earnings) every quarter.\n\nIn the days around an earnings announcement, stocks can move dramatically in either direction — sometimes 10-20% overnight.\n\nThis makes swing trades riskier around these dates. You may want to wait until after the announcement, or size your position smaller.'
-  },
-  winrate: {
-    title: 'What is Historical Success Rate?',
-    text: 'Out of all the times this exact type of trade pattern has appeared on this stock in the past, what percentage went in the right direction.\n\nExample: 60% means 6 out of 10 similar trades worked.\n\nThis is based on historical data — past performance doesn\'t guarantee future results, but it gives useful context.'
-  },
-  confidence: {
-    title: 'What is Confidence?',
-    text: 'The AI\'s overall score for this trade out of 100%.\n\nIt considers the historical success rate, how well the trade aligns with the current market trend, the quality of the price levels, and trading volume.\n\nHigher confidence means more factors are aligned in favour of the trade.'
-  },
-  markettrend: {
-    title: 'What does "goes with market" mean?',
-    text: 'Major stock indices like the S&P 500 and NASDAQ act as the tide that lifts or sinks most stocks.\n\nA trade that goes WITH the current market direction has a higher chance of success than one going against it.\n\n✅ With market = trend is in your favour\n⚠️ Neutral = market is sideways, less tailwind\n❌ Against market = swimming against the current, higher risk'
-  }
+var occasionsByAge = {
+  newborn: [
+    { v:'new-arrival', icon:'👶', label:'New Arrival' },
+    { v:'birthday',    icon:'🎂', label:'Birthday' },
+    { v:'christmas',   icon:'🎄', label:'Christmas' },
+    { v:'just-because',icon:'🌿', label:'Just Because' }
+  ],
+  baby: [
+    { v:'1st-birthday',  icon:'🎂', label:'1st Birthday' },
+    { v:'christening',   icon:'✝️', label:'Christening' },
+    { v:'christmas',     icon:'🎄', label:'Christmas' },
+    { v:'just-because',  icon:'🌿', label:'Just Because' }
+  ],
+  toddler: [
+    { v:'birthday',     icon:'🎂', label:'Birthday' },
+    { v:'christmas',    icon:'🎄', label:'Christmas' },
+    { v:'new-sibling',  icon:'👶', label:'New Sibling' },
+    { v:'just-because', icon:'🌿', label:'Just Because' }
+  ],
+  child: [
+    { v:'birthday',     icon:'🎂', label:'Birthday' },
+    { v:'christmas',    icon:'🎄', label:'Christmas' },
+    { v:'new-sibling',  icon:'👶', label:'New Sibling' },
+    { v:'just-because', icon:'🌿', label:'Just Because' }
+  ],
+  older: [
+    { v:'birthday',     icon:'🎂', label:'Birthday' },
+    { v:'christmas',    icon:'🎄', label:'Christmas' },
+    { v:'new-sibling',  icon:'👶', label:'New Sibling' },
+    { v:'just-because', icon:'🌿', label:'Just Because' }
+  ]
 };
 
-function showTooltip(key) {
-  const t = TOOLTIPS[key];
-  if(!t) return;
-  document.getElementById('tooltipTitle').textContent = t.title;
-  document.getElementById('tooltipText').textContent = t.text;
-  document.getElementById('tooltipOverlay').classList.add('open');
-}
-function closeTooltip() {
-  document.getElementById('tooltipOverlay').classList.remove('open');
-}
+// Age labels for context line
+var ageLabels = {
+  'newborn': 'a newborn',
+  'baby':    'a baby',
+  'toddler': 'a toddler',
+  'child':   'a little one',
+  'older':   'a big kid'
+};
 
-// ── DETAIL PANEL ──────────────────────────────────────────────────────────────
-function openDetail(tradeJSON) {
-  const t = JSON.parse(decodeURIComponent(tradeJSON));
-  const c = t.currency_symbol || '£';
-  document.getElementById('detailTitle').textContent = t.ticker + ' — Full Analysis';
+// Occasion labels for context line
+var occasionLabels = {
+  'new-arrival':  'new arrival',
+  'new-sibling':  'new sibling',
+  '1st-birthday': '1st birthday',
+  'christening':  'christening',
+  'birthday':     'birthday',
+  'christmas':    'Christmas',
+  'just-because': 'just because'
+};
 
-  const sentClass = t.sentiment_label === 'Positive' ? 'mood-positive' : t.sentiment_label === 'Negative' ? 'mood-negative' : 'mood-neutral';
-  const sentIcon = t.sentiment_label === 'Positive' ? '🟢' : t.sentiment_label === 'Negative' ? '🔴' : '⚪';
-  const maIcon = t.macro_alignment === 'aligned' ? '✅' : t.macro_alignment === 'divergent' ? '❌' : '⚠️';
-  const maText = t.macro_alignment === 'aligned' ? 'Goes with the market trend' : t.macro_alignment === 'divergent' ? 'Goes against the market trend — higher risk' : 'Market is neutral — no strong tailwind';
+var relationshipLines = {
+  'parent':      'Because no one knows them like you do — each can be <strong>personalised with your little one\'s name</strong>.',
+  'grandparent': 'The best grandparent gifts are personal ones — each can be <strong>personalised with their name</strong>.',
+  'godparent':   'A godparent\'s gift they\'ll keep forever — each can be <strong>personalised with their name</strong>.',
+  'aunt-uncle':  'From the best aunt or uncle around — each can be <strong>personalised with their name</strong>.',
+  'friend':      'The thoughtful friend gift they won\'t expect — each can be <strong>personalised with their name</strong>.',
+  'other':       'Each can be <strong>personalised with their name</strong> — wrapped in a free luxury gift box.'
+};
 
-  const signalLabels = {
-    'RSI oversold': 'Stock is oversold — potential bounce',
-    'Above 50EMA': 'Trading above key moving average',
-    'MACD cross': 'Momentum signal triggered',
-    'Volume surge': 'Unusually high trading volume',
-    'At support': 'Price at a key support level',
-    'Breakout': 'Breaking above resistance',
-  };
-  const signals = (t.signals || []).map(s => {
-    const plain = signalLabels[s] || s;
-    return `<span class="detail-chip highlight">${plain}</span>`;
-  }).join('');
+// Relationship weighting: grandparents & godparents skew toward keepsakes
+var relationshipWeights = {
+  'grandparent': { 'Luxury Keepsake': 3, 'Keepsake': 3, 'Gift Set': 2, 'Showstopper': 2 },
+  'godparent':   { 'Luxury Keepsake': 3, 'Keepsake': 3, 'Showstopper': 2 },
+  'parent':      {},
+  'aunt-uncle':  { 'Gift Set': 1, 'Bestseller': 1, 'Best Seller': 1 },
+  'friend':      { 'Best Seller': 1, 'Bestseller': 1 },
+  'other':       {}
+};
 
-  const factors = (t.additional_factors || []).map(f => `<span class="detail-chip">${f}</span>`).join('');
+// One "Most Popular" badge per tier
+var popularTags = { low: 'Best Seller', mid: 'Luxury Keepsake', high: 'Showstopper' };
 
-  const winRate = t.backtest_win_rate || 0;
-  const sample = t.backtest_sample || 0;
+var catalogue = [
+  // ── LOW TIER (under £30) ──
+  { name:'Classic Teddy Bear',              tag:'Best Seller',      price:'£29', tier:'low',  emoji:'🧸', bg:'#F5EEE8',
+    ages:['newborn','baby','toddler','child'],        occasions:['new-arrival','new-sibling','1st-birthday','christening','birthday','just-because','christmas'],
+    url:'https://www.my1styears.com/personalised-classic-teddy-bear-plush-toy.html' },
+  { name:'Grey Hooded Fleece Robe',         tag:'Wardrobe Staple',  price:'£25', tier:'low',  emoji:'🩶', bg:'#EEEEEE',
+    ages:['newborn','baby','toddler','child','older'], occasions:['new-arrival','new-sibling','1st-birthday','christening','birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/personalised-grey-hooded-fleece-robe.html' },
+  { name:'Penguin Fleece Robe',             tag:'Fan Favourite',    price:'£32', tier:'low',  emoji:'🐧', bg:'#EBF0F5',
+    ages:['newborn','baby','toddler','child','older'], occasions:['birthday','christmas','just-because','new-arrival'],
+    url:'https://www.my1styears.com/personalised-penguin-fleece-robe.html' },
+  { name:'Welly Boots',                     tag:'Personalised',     price:'£28', tier:'low',  emoji:'🥾', bg:'#EEF5EE',
+    ages:['toddler','child','older'],          occasions:['birthday','just-because','christmas'],
+    url:'https://www.my1styears.com/personalised-pink-spot-welly-boots.html' },
+  { name:'Dinosaur Pencil Case',            tag:'School Essential', price:'£17', tier:'low',  emoji:'✏️', bg:'#EEF5EE',
+    ages:['child','older'],                    occasions:['birthday','just-because','christmas'],
+    url:'https://www.my1styears.com/back-to-school/backpacks.html' },
+  { name:'Ditsy Print Mini Backpack',       tag:'Bestseller',       price:'£23', tier:'low',  emoji:'🌸', bg:'#F5EBF0',
+    ages:['toddler','child'],                  occasions:['birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/personalised-ditsy-print-mini-backpack.html' },
+  { name:'Dinosaur Mini Backpack',          tag:'Boys Favourite',   price:'£28', tier:'low',  emoji:'🦕', bg:'#EEF5EE',
+    ages:['toddler','child','older'],          occasions:['birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/personalised-dinosaur-print-mini-backpack.html' },
+  { name:'Teddy Bear Hooded Towel',         tag:'New In',           price:'£25', tier:'low',  emoji:'🛁', bg:'#EBF4F2',
+    ages:['newborn','baby','toddler'],         occasions:['new-arrival','new-sibling','1st-birthday','christening','birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/personalised-teddy-bear-hooded-towel.html' },
+  { name:'Flower Fleece Robe',              tag:'New In',           price:'£27', tier:'low',  emoji:'🌸', bg:'#F5EBF0',
+    ages:['newborn','baby','toddler','child'], occasions:['birthday','christmas','just-because','new-arrival'],
+    url:'https://www.my1styears.com/personalised-flower-fleece-robe.html' },
+  { name:'Personalised Water Bottle',       tag:'School Essential', price:'£23', tier:'low',  emoji:'💧', bg:'#EBF4F2',
+    ages:['child','older'],                    occasions:['birthday','just-because','christmas'],
+    url:'https://www.my1styears.com/kids/accessories/water-bottles.html' },
+  { name:'Cellular Baby Blanket',           tag:'Keepsake',         price:'£19', tier:'low',  emoji:'🌿', bg:'#F4F0E8',
+    ages:['newborn','baby'],                   occasions:['new-arrival','christening','1st-birthday','just-because'],
+    url:'https://www.my1styears.com/personalised-white-cellular-blanket.html' },
+  { name:'Home From Hospital Gift Set',     tag:'New Arrival',      price:'£29', tier:'low',  emoji:'🏠', bg:'#F0F4F0',
+    ages:['newborn'],                          occasions:['new-arrival'],
+    url:'https://www.my1styears.com/personalised-home-from-the-hospital-blue-giraffe-gift-set.html' },
 
-  document.getElementById('detailBody').innerHTML = `
-    <div class="detail-section">
-      <div class="detail-section-title">Price Level Analysis</div>
-      <div class="sr-detail-row">
-        <div class="sr-detail-text">${t.sr_context || 'Price sitting at a key technical level'}</div>
-        <div class="sr-levels-row">
-          ${t.key_support ? `<span class="sr-lv sup">Support: ${c}${t.key_support}</span>` : ''}
-          ${t.key_resistance ? `<span class="sr-lv res">Resistance: ${c}${t.key_resistance}</span>` : ''}
-        </div>
-      </div>
-    </div>
+  // ── MID TIER (£30–£65) ──
+  { name:'Reindeer Fleece Robe',            tag:'Christmas Pick',   price:'£31', tier:'mid',  emoji:'🦌', bg:'#F5F0E8',
+    ages:['newborn','baby','toddler','child','older'], occasions:['christmas'],
+    url:'https://www.my1styears.com/personalised-reindeer-robe-with-red-nose.html' },
+  { name:'Grey Quilted Backpack',           tag:'Most Loved',       price:'£30', tier:'mid',  emoji:'🎒', bg:'#EEEEEE',
+    ages:['child','older'],                    occasions:['birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/personalised-grey-quilted-medium-backpack.html' },
+  { name:'Bluey Backpack',                  tag:'Licensed',         price:'£35', tier:'mid',  emoji:'🐾', bg:'#E8F0F8',
+    ages:['toddler','child'],                  occasions:['birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/personalised-bluey-backpack.html' },
+  { name:'Large Graffiti Backpack',         tag:'Cool Kid',         price:'£43', tier:'mid',  emoji:'🎨', bg:'#F0EBF5',
+    ages:['child','older'],                    occasions:['birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/back-to-school/backpacks/medium-backpacks.html' },
+  { name:'Back to School Starter Set',      tag:'Gift Set',         price:'£55', tier:'mid',  emoji:'🏫', bg:'#EEF5F0',
+    ages:['child','older'],                    occasions:['birthday','just-because'],
+    url:'https://www.my1styears.com/back-to-school/shop-by-product/back-to-school-sets.html' },
+  { name:'Robe & Towel Gift Set',           tag:'Gift Set',         price:'£44', tier:'mid',  emoji:'🩷', bg:'#F5EBF2',
+    ages:['newborn','baby','toddler'],         occasions:['new-arrival','new-sibling','1st-birthday','christening','birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/personalised-borg-robe-and-towel-set.html' },
+  { name:'Embroidered Memory Box',          tag:'Keepsake',         price:'£44', tier:'mid',  emoji:'💌', bg:'#F4F0E8',
+    ages:['newborn','baby','toddler'],         occasions:['new-arrival','new-sibling','1st-birthday','christening','birthday','christmas'],
+    url:'https://www.my1styears.com/personalised-memory-box.html' },
+  { name:'Christmas Pyjamas & Robe Set',    tag:'Christmas Set',    price:'£60', tier:'mid',  emoji:'🎄', bg:'#EEF5EE',
+    ages:['newborn','baby','toddler','child','older'], occasions:['christmas'],
+    url:'https://www.my1styears.com/personalised-christmas-pyjamas-robe-set.html' },
+  { name:'Safari Print Welly Boots',        tag:'Personalised',     price:'£27', tier:'mid',  emoji:'🦒', bg:'#F5F2E8',
+    ages:['toddler','child'],                  occasions:['birthday','just-because','christmas'],
+    url:'https://www.my1styears.com/personalised-pink-safari-print-welly-boots.html' },
+  { name:'Wooden Alphabet Abacus',          tag:'Educational Toy',  price:'£46', tier:'mid',  emoji:'🔤', bg:'#F5F0E8',
+    ages:['baby','toddler','child'],           occasions:['1st-birthday','birthday','just-because'],
+    url:'https://www.my1styears.com/personalised-wooden-alphabet-abacus-toy.html' },
+  { name:'Christening Day Keepsake Box',    tag:'Christening Gift', price:'£44', tier:'mid',  emoji:'✝️', bg:'#F4F0E8',
+    ages:['newborn','baby'],                   occasions:['christening'],
+    url:'https://www.my1styears.com/personalised-wooden-christening-day-keepsake-box.html' },
+  { name:'Big & Little Sibling Robe Set',   tag:'New Sibling Gift', price:'£60', tier:'mid',  emoji:'🩷', bg:'#F5EBF0',
+    ages:['baby','toddler','child'],           occasions:['new-sibling'],
+    url:'https://www.my1styears.com/personalised-big-sibling-little-sibling-fleece-robe-gift-set.html' },
+  { name:'Matching Blue Sibling Robe Set',  tag:'New Sibling Gift', price:'£55', tier:'mid',  emoji:'🩵', bg:'#EBF0F5',
+    ages:['baby','toddler','child'],           occasions:['new-sibling'],
+    url:'https://www.my1styears.com/matching-blue-sibling-robe-set.html' },
 
-    <div class="detail-section">
-      <div class="detail-section-title">Market Alignment <button onclick="showTooltip('markettrend')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 6px;cursor:pointer;margin-left:6px;">ℹ What's this?</button></div>
-      <div class="detail-row">
-        <span class="detail-key">${maIcon} ${maText}</span>
-      </div>
-    </div>
-
-    <div class="detail-section">
-      <div class="detail-section-title">Historical Success Rate <button onclick="showTooltip('winrate')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 6px;cursor:pointer;margin-left:6px;">ℹ What's this?</button></div>
-      <div class="detail-text">${winRate}% of ${sample} similar past trades worked on this stock.</div>
-      <div class="detail-bar-row">
-        <div class="detail-bar-bg"><div class="detail-bar-fill" style="width:${winRate}%"></div></div>
-      </div>
-    </div>
-
-    <div class="detail-section">
-      <div class="detail-section-title">Confidence Score <button onclick="showTooltip('confidence')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 6px;cursor:pointer;margin-left:6px;">ℹ What's this?</button></div>
-      <div class="detail-text">${t.confidence_pct}% — all factors considered.</div>
-      <div class="detail-bar-row">
-        <div class="detail-bar-bg"><div class="detail-bar-fill" style="width:${t.confidence_pct}%"></div></div>
-      </div>
-    </div>
-
-    ${signals ? `<div class="detail-section">
-      <div class="detail-section-title">Why Now</div>
-      <div class="detail-chips">${signals}</div>
-    </div>` : ''}
-
-    ${factors ? `<div class="detail-section">
-      <div class="detail-section-title">Supporting Technical Signals</div>
-      <div class="detail-chips">${factors}</div>
-    </div>` : ''}
-
-    <div class="detail-section">
-      <div class="detail-section-title">Market Mood</div>
-      <span class="mood-badge ${sentClass}">${sentIcon} ${t.sentiment_label || 'Neutral'}</span>
-    </div>
-
-    ${t.liquidity_note ? `<div class="detail-section">
-      <div class="detail-section-title">How Easy to Trade</div>
-      <div class="detail-text">💧 ${t.liquidity_note}</div>
-    </div>` : ''}
-
-    <div class="detail-section">
-      <div class="detail-section-title">Trade Metrics</div>
-      <div class="detail-row"><span class="detail-key">Reward/Risk <button onclick="showTooltip('rr')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val">${realRR}× — for every $1 risked, potential $${realRR} gain</span></div>
-      <div class="detail-row"><span class="detail-key">Edge Score <button onclick="showTooltip('edge')" style="font-family:var(--mono);font-size:9px;color:var(--sheen);background:var(--chrome-3);border:1px solid var(--chrome-4);border-radius:3px;padding:1px 5px;cursor:pointer;">ℹ</button></span><span class="detail-val" style="color:${ev>=1?'var(--green)':ev>=0?'var(--amber)':'var(--red)'};">${ev>=0?'+':''}${ev.toFixed(2)} — ${evLabel}</span></div>
-      <div class="detail-row"><span class="detail-key">Estimated hold time</span><span class="detail-val">${t.expected_days} days</span></div>
-      <div class="detail-row"><span class="detail-key">Average win on this pattern</span><span class="detail-val">${t.backtest_avg_gain}%</span></div>
-    </div>
-  `;
-
-  document.getElementById('detailOverlay').classList.add('open');
-}
-function closeDetail() {
-  document.getElementById('detailOverlay').classList.remove('open');
-}
-
-// ── HOW IT WORKS ─────────────────────────────────────────────────────────────
-let viewMode = 'simple';
-const HIW_BEGINNER = [
-  { icon: '📈', title: 'Step 1 — Market check', desc: 'Before looking at any stocks, TaoScan checks how the overall US market is doing using real closing prices from the previous session. If the S&P 500 and Nasdaq are rising, we favour buying opportunities. If they\'re falling, we\'re more cautious.' },
-  { icon: '🔍', title: 'Step 2 — Finding standout stocks', desc: 'We scan thousands of US stocks from the previous trading day. We look for stocks that stood out — where more people than usual were buying and selling, where the price closed strongly near its high, and where the stock did better than the overall market. Stocks that outperform the market tend to keep outperforming.' },
-  { icon: '⚠️', title: 'Step 3 — Flagging earnings risk', desc: 'Companies announce their financial results a few times a year. These "earnings" dates can cause stocks to jump or crash 10-20% overnight. We check whether any shortlisted stock has earnings coming up soon and warn you clearly if so — so you can decide whether to avoid it or trade with a smaller amount.' },
-  { icon: '🤖', title: 'Step 4 — AI analysis with real data', desc: 'An AI studies the shortlisted stocks using their actual price data from the previous session — where they opened, how high and low they went, and where they closed. It uses this real data to identify price levels where buyers have historically stepped in, rather than relying on memory alone.' },
-  { icon: '💰', title: 'Step 5 — Setting your price levels', desc: 'For each trade the AI sets three key prices: where to buy in, where to take your profit, and where to cut your losses if the trade goes wrong. These are adjusted to match the real closing price from Polygon.io.' },
-  { icon: '🏆', title: 'Step 6 — Ranking the best ones', desc: 'Trades are ranked by how statistically favourable they are — combining how often this type of setup has worked historically with how much you could make versus how much you could lose.' },
+  // ── HIGH TIER (£65+) ──
+  { name:'Teddy Bear Night-Time Set',       tag:'Gift Set',         price:'£95',  tier:'high', emoji:'🌙', bg:'#EEE8F5',
+    ages:['newborn','baby','toddler'],         occasions:['new-arrival','new-sibling','1st-birthday','christening','birthday','christmas'],
+    url:'https://www.my1styears.com/personalised-teddy-bear-night-time-splash-snuggle-cuddle-gift-set.html' },
+  { name:'Best of Teddy Bear Gift Set',     tag:'Showstopper',      price:'£125', tier:'high', emoji:'✨', bg:'#F5F0E8',
+    ages:['newborn','baby','toddler','child'], occasions:['new-arrival','new-sibling','1st-birthday','christening','birthday','christmas'],
+    url:'https://www.my1styears.com/personalised-ultimate-teddy-bear-gift-set.html' },
+  { name:'Merrythought Teddy Bear',         tag:'Luxury Keepsake',  price:'£135', tier:'high', emoji:'🐻', bg:'#F5F0E8',
+    ages:['newborn','baby','toddler','child'], occasions:['new-arrival','new-sibling','1st-birthday','christening','birthday','christmas','just-because'],
+    url:'https://www.my1styears.com/personalised-merrythought-x-my-first-bear-gift-set.html' },
+  { name:'Biscuit Bear Toy Box',            tag:'Furniture',        price:'£130', tier:'high', emoji:'📦', bg:'#F0EEE8',
+    ages:['toddler','child'],                  occasions:['birthday','christmas','just-because','new-arrival','new-sibling'],
+    url:'https://www.my1styears.com/personalised-biscuit-bear-white-toy-box-fscr.html' },
+  { name:'Ultimate Back to School Set',     tag:'Showstopper',      price:'£85',  tier:'high', emoji:'🎒', bg:'#EEF5F0',
+    ages:['child','older'],                    occasions:['birthday','just-because','christmas'],
+    url:'https://www.my1styears.com/back-to-school/shop-by-product/back-to-school-sets.html' },
+  { name:'Silver Engraved Baby Bangle',     tag:'Keepsake Jewellery', price:'£70', tier:'high', emoji:'💍', bg:'#F5F0E8',
+    ages:['newborn','baby'],                   occasions:['christening','new-arrival','1st-birthday'],
+    url:'https://www.my1styears.com/silver-engraved-baby-keepsake-bangle.html' },
+  { name:'New Mama & Baby Hospital Set',    tag:'New Arrival',      price:'£130', tier:'high', emoji:'🌟', bg:'#F5F0E8',
+    ages:['newborn'],                          occasions:['new-arrival'],
+    url:'https://www.my1styears.com/personalised-new-mama-baby-hospital-bag-gift-set.html' },
 ];
 
-const HIW_TRADER = [
-  { icon: '📊', title: '1. Macro context (Polygon.io)', desc: 'SPY and QQQ previous close prices are fetched from Polygon.io and injected into the AI prompt. Groq\'s model assesses trend direction, key S/R levels and overall market bias (bullish/neutral/bearish) anchored to real price data.' },
-  { icon: '🔬', title: '2. Quantitative screening (Polygon.io)', desc: 'Previous day grouped aggregates pulled for all NYSE/NASDAQ stocks. Each scored on: volume (25%), intraday momentum (25%), close vs session high (20%), relative strength vs SPY (20%), VWAP position (10%). Top 15 per tier shortlisted with sector diversification applied.' },
-  { icon: '🧠', title: '3. LLM analysis (Groq — Llama 3.3 70b)', desc: 'Full OHLCV data, RS vs SPY, VWAP position and earnings flags for all 15 candidates are passed to Groq. The model uses actual price action — not just ticker names — to identify S/R levels, classify patterns and generate trade levels.' },
-  { icon: '📐', title: '4. EV ranking', desc: 'Trades are ranked by Expected Value: (win_rate × R:R) − (loss_rate × 1). Positive EV indicates statistical edge over a large sample. Trades are trimmed to the top 3 per tier by EV score before display.' },
-  { icon: '💹', title: '5. Price adjustment (Polygon.io)', desc: 'AI-suggested price levels are scaled proportionally to the actual Polygon previous close, correcting for divergence between the model\'s training data prices and current market prices.' },
-];
 
-const HIW_LIMITATIONS_BEGINNER = 'One important thing to know: TaoScan is a starting point, not a guarantee. The AI learned from historical data and can\'t see what\'s happening right now in the market. Prices shown are from the previous session\'s close. Earnings warnings are based on available data but may not be complete. Always check the current price and do your own research before making any trade.';
 
-const HIW_LIMITATIONS_TRADER = 'Limitations: LLM analysis is bounded by training data cutoff — no live chart analysis or order flow. Volume scoring uses previous day data only (free tier). S/R levels are model-generated estimates. Earnings flags sourced from Polygon financials API but may not be complete. Sector diversification uses a simplified letter-group proxy — no true GICS sector data on free tier. RS calculation vs SPY is single-day only, not multi-week.';
-
-let hiwOpen = false;
-function toggleHIW() {
-  hiwOpen = !hiwOpen;
-  document.getElementById('hiwBody').style.display = hiwOpen ? 'block' : 'none';
-  document.getElementById('hiwIcon').style.transform = hiwOpen ? 'rotate(90deg)' : '';
-  if(hiwOpen) renderHIW();
+function setProgress(step) {
+  var total = answers[0] === 'newborn' ? 2 : 3;
+  document.getElementById('progressFill').style.width = ((step / total) * 100) + '%';
+  document.getElementById('progressLabel').textContent =
+    step < total ? 'Step ' + (step + 1) + ' of ' + total : 'Your personalised picks';
 }
 
-function renderHIW() {
-  const isSimple = viewMode === 'simple';
-  const steps = isSimple ? HIW_BEGINNER : HIW_TRADER;
-  const lim = isSimple ? HIW_LIMITATIONS_BEGINNER : HIW_LIMITATIONS_TRADER;
-  const limTitle = isSimple ? '⚠ One thing to keep in mind' : '⚠ Known limitations';
-  document.getElementById('hiwContent').innerHTML =
-    `<div style="padding-top:4px;">${steps.map(s => `
-      <div class="hiw-step">
-        <div class="hiw-icon">${s.icon}</div>
-        <div class="hiw-step-content">
-          <div class="hiw-step-title">${s.title}</div>
-          <div class="hiw-step-desc">${s.desc}</div>
-        </div>
-      </div>`).join('')}
-      <div class="hiw-limitations">
-        <div class="hiw-lim-title">${limTitle}</div>
-        <div class="hiw-lim-text">${lim}</div>
-      </div>
-    </div>`;
+function goToStep(n) {
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('step-results').classList.remove('active');
+  document.getElementById('step-' + n).classList.add('active');
+  setProgress(n);
 }
 
-// Re-render HIW content when mode switches
-const _origSetMode = setMode;
-// Patch setMode to also refresh HIW if open
-function setMode(mode) {
-  viewMode = mode;
-  document.getElementById('modeSimple').classList.toggle('active', mode === 'simple');
-  document.getElementById('modeTrader').classList.toggle('active', mode === 'trader');
-  document.querySelectorAll('.trade-card[data-tobj]').forEach(card => {
-    const t = JSON.parse(card.getAttribute('data-tobj'));
-    const scanDateKey = card.getAttribute('data-scandate') || '';
-    const tier = {id: card.getAttribute('data-tierid') || 'large', liquidityNote: false};
-    const i = parseInt(card.getAttribute('data-cardidx') || '0');
-    const gIdx = parseInt(card.getAttribute('data-gidx') || '0');
-    card.outerHTML = renderCard(t, i, gIdx, tier, scanDateKey);
-  });
-  setTimeout(() => {
-    document.querySelectorAll('.conf-front-bar-fill').forEach(el => {
-      const pct = el.getAttribute('data-pct');
-      if(pct) el.style.width = pct + '%';
-    });
-  }, 100);
-  if(hiwOpen) renderHIW();
-}
-
-// ── VIEW MODE ─────────────────────────────────────────────────────────────────
-// ── CLOCK ──────────────────────────────────────────────────────────────────────
-const SIMPLE_PATTERNS = {
-  breakout:      'Ready to break higher — been building pressure in a tight range',
-  accumulation:  'Smart money looks to be buying quietly at these lower prices',
-  momentum:      'Already moving up strongly — catching a brief dip to join the trend',
-  breakdown:     'Losing support — looks set to fall further',
-  distribution:  'Big players appear to be selling at these levels',
-};
-
-const SIMPLE_ALIGNMENT = {
-  aligned:   'The overall market is going the same way — good tailwind',
-  neutral:   'Market is going sideways — no strong help or hindrance',
-  divergent: 'This trade goes against the market direction — higher risk',
-};
-
-const TRADER_PATTERNS = {
-  breakout:     'Price Breakout',
-  accumulation: 'Accumulation / Support Buy',
-  momentum:     'Momentum Continuation',
-  breakdown:    'Breakdown / Short Setup',
-  distribution: 'Distribution / Supply Zone',
-};
-
-// ── CLOCK ──────────────────────────────────────────────────────────────────────
-let GBP_USD = 1.27;
-
-// ── SIDEBAR ────────────────────────────────────────────────────────────────────
-function switchTab(tab){document.querySelectorAll('.stab').forEach((el,i)=>el.classList.toggle('active',['history','performance'][i]===tab));document.querySelectorAll('.sidebar-panel').forEach(el=>el.classList.remove('active'));document.getElementById(`panel-${tab}`).classList.add('active');if(tab==='performance')renderPerformancePanel();}
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('visible');}
-function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('visible');}
-function setStatus(t,a=false){
-  const bar=document.getElementById('statusBar');
-  document.getElementById('statusText').textContent=t;
-  document.getElementById('statusDot').className='status-dot'+(a?' active':'');
-  if(bar) bar.style.display = a ? 'flex' : 'none';
-}
-function showError(m){const e=document.getElementById('errorMsg');e.textContent='⚠ '+m;e.style.display='block';}
-function clearError(){document.getElementById('errorMsg').style.display='none';}
-function toast(msg,col){const t=document.getElementById('saveToast');t.textContent=msg;t.style.background=col||'linear-gradient(135deg,var(--chrome-3),var(--chrome-4))';t.style.color=col?'#fff':'var(--silver)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
-
-// ── STORAGE ────────────────────────────────────────────────────────────────────
-const HIST_KEY='taoscan_history',TRADE_KEY='taoscan_trades';
-function loadHistory(){try{const r=localStorage.getItem(HIST_KEY);return r?JSON.parse(r):[]}catch{return[]}}
-function saveHistoryData(h){try{localStorage.setItem(HIST_KEY,JSON.stringify(h))}catch(e){}}
-function loadTrades(){try{const r=localStorage.getItem(TRADE_KEY);return r?JSON.parse(r):[]}catch{return[]}}
-function saveTrades(t){try{localStorage.setItem(TRADE_KEY,JSON.stringify(t))}catch(e){}}
-
-function persistScan(tiers,summary,filterStr,macroData){
-  const history=loadHistory();
-  const dateKey=new Date().toISOString().slice(0,10);
-  const dateLabel=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-  const timeLabel=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-  const allTickers=[];tiers.forEach(td=>(td.trades||[]).forEach(t=>allTickers.push(t.ticker)));
-  const entry={dateKey,dateLabel,timeLabel,summary,filterStr,tiers,tickers:allTickers,macroData:macroData||null};
-  const ex=history.findIndex(h=>h.dateKey===dateKey);
-  if(ex>=0)history[ex]=entry;else history.unshift(entry);
-  if(history.length>90)history.length=90;
-  saveHistoryData(history);renderSidebar();toast('✓ Scan saved');
-}
-
-// ── TRADE TRACKING ─────────────────────────────────────────────────────────────
-function recordTrade(ticker,setupType,exchange,outcome,cashAmount,cashCcy,pnlGBP,pnlUSD,scanDate){
-  const trades=loadTrades();const id=ticker+'_'+scanDate;const ex=trades.findIndex(t=>t.id===id);
-  const entry={id,ticker,setupType,exchange,outcome,cashAmount,cashCcy,pnlGBP,pnlUSD,scanDate,loggedAt:new Date().toISOString()};
-  if(ex>=0)trades[ex]=entry;else trades.unshift(entry);if(trades.length>500)trades.length=500;
-  saveTrades(trades);renderPerformancePanel();renderSidebar();
-}
-
-function buildLearningContext(){
-  const trades=loadTrades().filter(t=>t.outcome==='win'||t.outcome==='loss');
-  if(trades.length<3)return'';
-  const total=trades.length,wins=trades.filter(t=>t.outcome==='win').length;
-  const winRate=Math.round((wins/total)*100);
-  const setupStats={};
-  trades.forEach(t=>{if(!setupStats[t.setupType])setupStats[t.setupType]={wins:0,losses:0};if(t.outcome==='win')setupStats[t.setupType].wins++;else setupStats[t.setupType].losses++;});
-  const setupLines=Object.entries(setupStats).map(([s,v])=>`${s}:${v.wins}W/${v.losses}L`).join(',');
-  return`\nUSER HISTORY(${total} trades,${winRate}% win): ${setupLines}. Boost confidence for winning patterns. Reduce for losing ones.`;
-}
-
-function renderPerformancePanel(){
-  const trades=loadTrades();const closed=trades.filter(t=>t.outcome==='win'||t.outcome==='loss');const opens=trades.filter(t=>t.outcome==='open');const wins=closed.filter(t=>t.outcome==='win');const totalPnl=closed.reduce((s,t)=>s+(t.outcome==='win'?t.pnlGBP:-t.pnlGBP),0);const wr=closed.length>0?Math.round((wins.length/closed.length)*100):0;
-  document.getElementById('pf-total').textContent=closed.length;document.getElementById('pf-winrate').textContent=closed.length>0?wr+'%':'—';
-  const pe=document.getElementById('pf-pnl');pe.textContent=(totalPnl>=0?'+':'')+fmt(totalPnl,'GBP')+' / '+(totalPnl>=0?'+':'')+fmt(totalPnl*GBP_USD,'USD');pe.className='pb-val '+(totalPnl>=0?'pb-win':'pb-loss');document.getElementById('pf-open').textContent=opens.length;
-  const setupStats={};closed.forEach(t=>{if(!setupStats[t.setupType])setupStats[t.setupType]={w:0,l:0,pnl:0};setupStats[t.setupType][t.outcome==='win'?'w':'l']++;setupStats[t.setupType].pnl+=(t.outcome==='win'?t.pnlGBP:-t.pnlGBP);});
-  const sb=document.getElementById('setupBreakdown');
-  if(!Object.keys(setupStats).length){sb.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--sheen);">No closed trades yet</div>';}
-  else{sb.innerHTML=Object.entries(setupStats).map(([s,v])=>{const wr=Math.round((v.w/(v.w+v.l))*100);const pc=v.pnl>=0?'var(--green)':'var(--red)';return`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--chrome-3);font-family:var(--mono);font-size:10px;"><span style="text-transform:capitalize;color:var(--bright);">${s}</span><span style="color:var(--sheen);">${v.w}W/${v.l}L</span><span style="color:${wr>=50?'var(--green)':'var(--red)'};">${wr}%</span><span style="color:${pc};">${v.pnl>=0?'+':''}${fmt(v.pnl,'GBP')}</span></div>`;}).join('');}
-  const logEl=document.getElementById('tradeLog');
-  if(!trades.length){logEl.innerHTML='<div style="font-family:var(--mono);font-size:10px;color:var(--sheen);">No trades logged yet</div>';}
-  else{logEl.innerHTML=trades.slice(0,20).map(t=>{const oc=t.outcome==='win'?'tli-win':t.outcome==='loss'?'tli-loss':'tli-open';const ps=t.outcome==='open'?'Open':(t.outcome==='win'?'+':'-')+fmt(t.pnlGBP,'GBP');const pc=t.outcome==='win'?'var(--green)':t.outcome==='loss'?'var(--red)':'var(--blue)';return`<div class="trade-log-item"><span class="tli-ticker">${t.ticker}</span><span class="tli-outcome ${oc}">${t.outcome.toUpperCase()}</span><div class="tli-details"><div class="tli-pnl" style="color:${pc};">${ps}</div><div class="tli-meta">${t.setupType||''} · ${t.scanDate||''}</div></div></div>`;}).join('');}
-  const lb=document.getElementById('learnBadge'),lt=document.getElementById('learnText');
-  if(closed.length>=3){lb.style.display='flex';const best=Object.entries(setupStats).sort((a,b)=>(b[1].w/(b[1].w+b[1].l))-(a[1].w/(a[1].w+a[1].l)))[0];lt.textContent=`Best pattern: ${best?best[0]:'-'} (${best?Math.round((best[1].w/(best[1].w+best[1].l))*100):'?'}% win). Scanner is learning from your results.`;}else{lb.style.display='none';}
-}
-
-function renderSidebar(){
-  const history=loadHistory(),trades=loadTrades(),listEl=document.getElementById('historyList');
-  if(!history.length){listEl.innerHTML='<div class="sidebar-empty">No scans yet.<br>Run your first scan.</div>';return;}
-  const todayKey=new Date().toISOString().slice(0,10);
-  listEl.innerHTML=history.map((entry,idx)=>{
-    const isToday=entry.dateKey===todayKey;
-    const tickersHtml=(entry.tickers||[]).slice(0,7).map(tk=>{const trd=trades.find(t=>t.ticker===tk&&t.scanDate===entry.dateKey);const cls=trd?(trd.outcome==='win'?'win':trd.outcome==='loss'?'loss':''):'';return`<span class="hi-ticker ${cls}">${tk}</span>`;}).join('');
-    return`<div class="history-item${isToday?' today-item':''}" onclick="viewEntry(${idx})"><div class="hi-date">${isToday?'● TODAY — ':''} ${entry.dateLabel}</div><div class="hi-meta">${entry.timeLabel}${entry.filterStr?' · '+entry.filterStr:''}</div><div class="hi-tickers">${tickersHtml}</div></div>`;
-  }).join('');
-}
-
-let viewingMode=false;
-function viewEntry(idx){
-  const entry=loadHistory()[idx];if(!entry)return;viewingMode=true;closeSidebar();
-  document.querySelectorAll('.history-item').forEach((el,i)=>el.classList.toggle('active',i===idx));
-  document.getElementById('viewingBanner').classList.add('visible');document.getElementById('viewingLabel').textContent=`${entry.dateLabel} at ${entry.timeLabel}`;
-  document.getElementById('controlsBar').style.opacity='.4';document.getElementById('controlsBar').style.pointerEvents='none';document.getElementById('scanBtn').disabled=true;
-  setStatus(`Historical — ${entry.dateLabel}`,false);renderFromData(entry.tiers,entry.macroData||null,entry.dateKey);
-}
-function backToLive(){
-  viewingMode=false;document.getElementById('viewingBanner').classList.remove('visible');document.getElementById('controlsBar').style.opacity='';document.getElementById('controlsBar').style.pointerEvents='';document.getElementById('scanBtn').disabled=false;
-  document.querySelectorAll('.history-item').forEach(el=>el.classList.remove('active'));
-  setStatus('Ready — click SCAN',false);
-  document.getElementById('resultsArea').innerHTML='<div class="empty-state"><div class="empty-icon">道</div><div class="empty-title">TaoScan</div><div class="empty-sub">Click SCAN for fresh recommendations</div></div>';
-}
-function confirmClear(){if(confirm('Delete all scan history?')){localStorage.removeItem(HIST_KEY);renderSidebar();toast('History cleared');if(viewingMode)backToLive();}}
-function confirmClearTrades(){if(confirm('Delete all trade log entries?')){localStorage.removeItem(TRADE_KEY);renderPerformancePanel();renderSidebar();toast('Trade log cleared');}}
-
-// ── CASH ───────────────────────────────────────────────────────────────────────
-function toGBP(a,c){return c==='USD'?a/GBP_USD:a;}
-function toUSD(a,c){return c==='GBP'?a*GBP_USD:a;}
-function calcCashPnL(t,ca,cc){
-  // All stocks are US (USD) — convert user's cash to USD, calc shares, convert back
-  const cashUSD = toUSD(ca, cc);
-  const shares = cashUSD / t.buy_price;
-  const gainUSD = shares * (t.target_price - t.buy_price);
-  const lossUSD = shares * (t.buy_price - t.stop_price);
-  return {
-    gainGBP: gainUSD / GBP_USD,
-    gainUSD,
-    lossGBP: lossUSD / GBP_USD,
-    lossUSD,
-  };
-}
-function fmt(n,ccy){return(ccy==='GBP'?'£':'$')+Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0});}
-
-// Format Polygon date string (YYYY-MM-DD) to e.g. "Fri 18 Apr 2026"
-function formatPriceDate(dateStr) {
-  if(!dateStr) return 'prev session';
-  try {
-    const d = new Date(dateStr + 'T12:00:00Z');
-    return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
-  } catch(e) { return dateStr; }
-}
-function refreshCashEstimates(){
-  const ca=parseFloat(document.getElementById('cashInput').value)||1000;const cc=document.getElementById('cashCurrency').value;
-  document.querySelectorAll('.trade-card[data-trade]').forEach(card=>{
-    try{const t=JSON.parse(card.getAttribute('data-trade'));const p=calcCashPnL(t,ca,cc);
-    const gv=card.querySelector('.gain-val'),lv=card.querySelector('.loss-val'),gd=card.querySelector('.gain-dual'),ld=card.querySelector('.loss-dual');
-    if(gv)gv.textContent='+'+fmt(p.gainGBP,'GBP');if(lv)lv.textContent='-'+fmt(p.lossGBP,'GBP');
-    if(gd)gd.textContent='≈ +'+fmt(p.gainUSD,'USD');if(ld)ld.textContent='≈ -'+fmt(p.lossUSD,'USD');}catch(e){}
+function buildOccasions(age) {
+  var c = document.getElementById('occasionOptions');
+  c.innerHTML = '';
+  var opts = occasionsByAge[age] || occasionsByAge.toddler;
+  opts.forEach(function(o) {
+    var b = document.createElement('button');
+    b.className = 'opt';
+    b.setAttribute('data-step', '2');
+    b.setAttribute('data-value', o.v);
+    b.innerHTML = o.label;
+    c.appendChild(b);
   });
 }
 
-// ── PRICE API ─────────────────────────────────────────────────────────────────
-const SCREEN_URL = PROXY_URL.replace(/\/$/, '') + '/screen';
+function pickTier(tier) {
+  var age = answers[0], rel = answers[1], occ = answers[2];
+  var weights = relationshipWeights[rel] || {};
+  var results = catalogue
+    .filter(function(p) { return p.tier === tier; })
+    .filter(function(p) {
+      // Hard exclusion: must match at least one of age OR occasion
+      var ageMatch = p.ages.indexOf(age) > -1;
+      var occMatch = p.occasions.indexOf(occ) > -1;
+      return ageMatch || occMatch;
+    })
+    .map(function(p) {
+      var s = 0;
+      if (p.ages.indexOf(age) > -1)      s += 4; // stronger age weight
+      if (p.occasions.indexOf(occ) > -1) s += 3; // stronger occasion weight
+      if (weights[p.tag])                s += weights[p.tag];
+      return { p: p, s: s };
+    })
+    .sort(function(a, b) { return b.s - a.s; })
+    .slice(0, 2)
+    .map(function(x) { return x.p; });
 
-// Tier price ranges for Polygon screener
-const TIER_RANGES = {
-  large: { minPrice: 50,   maxPrice: null,  label: 'Large Companies ($50+)' },
-  mid:   { minPrice: 10,   maxPrice: 49.99, label: 'Mid-Size Companies ($10-$49)' },
-  small: { minPrice: 0.5,  maxPrice: 9.99,  label: 'Smaller Companies (under $10)' },
-};
-
-async function fetchScreenedStocks(tierId) {
-  try {
-    const res = await fetch(SCREEN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tier: TIER_RANGES[tierId], limit: 10 })
-    });
-    const data = await res.json();
-    return data;
-  } catch(e) {
-    console.warn('Screen failed:', e);
-    return { candidates: [], error: e.message };
+  // Fallback: if exclusion filtered too aggressively, loosen to age-only match
+  if (results.length < 2) {
+    results = catalogue
+      .filter(function(p) { return p.tier === tier && p.ages.indexOf(age) > -1; })
+      .slice(0, 2);
   }
+  return results;
 }
 
-// Fetch index prices from Polygon via /screen endpoint with a special flag
-async function fetchIndexPricesFromPolygon() {
-  try {
-    const res = await fetch(SCREEN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ indices: true })
-    });
-    const data = await res.json();
-    return data.prices || {};
-  } catch(e) {
-    console.warn('Index price fetch failed:', e);
-    return {};
-  }
-}
-
-// Enrich AI-recommended trades with real prices from Polygon screener data
-// screenCandidates is the array already fetched for this tier
-function enrichTradesFromScreener(trades, screenCandidates, screenDate) {
-  if (!trades || !trades.length) return trades;
-  return trades.map(t => {
-    // Find matching candidate by ticker
-    const match = screenCandidates.find(c =>
-      c.ticker.toUpperCase() === t.ticker.toUpperCase().replace(/\.(L|LON)$/i, '')
-    );
-    if (match && match.close && match.close > 0) {
-      const ratio = match.close / t.current_price;
-      return {
-        ...t,
-        current_price: match.close,
-        price_datetime: screenDate || null,
-        volume: match.volume || null,
-        volume_ratio: match.volume ? (match.volume / 1000000).toFixed(1) + 'M' : null,
-        change_pct: match.change_pct || null,
-        closed_near_high: match.closed_near_high || false,
-        buy_price:    isFinite(ratio) && ratio > 0 ? Math.round(t.buy_price    * ratio * 100) / 100 : t.buy_price,
-        target_price: isFinite(ratio) && ratio > 0 ? Math.round(t.target_price * ratio * 100) / 100 : t.target_price,
-        stop_price:   isFinite(ratio) && ratio > 0 ? Math.round(t.stop_price   * ratio * 100) / 100 : t.stop_price,
-        key_support:  isFinite(ratio) && ratio > 0 ? Math.round(t.key_support  * ratio * 100) / 100 : t.key_support,
-        key_resistance: isFinite(ratio) && ratio > 0 ? Math.round(t.key_resistance * ratio * 100) / 100 : t.key_resistance,
-        price_updated: true,
-        price_source: 'polygon',
-        // Override AI earnings guess with real Polygon data
-        earnings_warning: match.earnings_soon || t.earnings_warning,
-      };
+function renderCards(products, gridId, tier) {
+  var grid = document.getElementById(gridId);
+  grid.innerHTML = '';
+  var popularTag = popularTags[tier];
+  var popularAdded = false;
+  products.forEach(function(p) {
+    var a = document.createElement('a');
+    a.className = 'prod-card';
+    a.href = p.url;
+    a.target = '_blank';
+    var badge = '';
+    if (!popularAdded && p.tag === popularTag) {
+      badge = '<div class="prod-badge">★ Most Popular</div>';
+      popularAdded = true;
+    } else if (!popularAdded && products.indexOf(p) === 0) {
+      badge = '<div class="prod-badge">★ Staff Pick</div>';
+      popularAdded = true;
     }
-    return { ...t, price_updated: false };
+    a.innerHTML =
+      '<div class="prod-swatch" style="background:' + p.bg + '">' +
+        badge +
+        '<div class="prod-swatch-inner">' + p.emoji + '</div>' +
+      '</div>' +
+      '<div class="prod-body">' +
+        '<span class="prod-tag">' + p.tag + '</span>' +
+        '<div class="prod-name">' + p.name + '</div>' +
+        '<div class="prod-foot">' +
+          '<span>' + p.price + '</span>' +
+          '<span class="prod-gift">🎁 Free box</span>' +
+        '</div>' +
+      '</div>';
+    grid.appendChild(a);
   });
 }
 
-function parseJSON(raw){
-  let s=raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
-  const st=s.indexOf('{');if(st>0)s=s.slice(st);
-  let d=0,end=-1;for(let i=0;i<s.length;i++){if(s[i]==='{')d++;else if(s[i]==='}'){d--;if(d===0){end=i;break;}}}
-  if(end>0)s=s.slice(0,end+1);return JSON.parse(s);
+function showResults() {
+  renderCards(pickTier('low'),  'gridLow',  'low');
+  renderCards(pickTier('mid'),  'gridMid',  'mid');
+  renderCards(pickTier('high'), 'gridHigh', 'high');
+
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('step-results').classList.add('active');
+
+  // Progress label
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Your personalised picks';
+
+  var age = answers[0], occ = answers[2];
+  var ageLabel = ageLabels[age] || 'them';
+  var occLabel = occasionLabels[occ] || '';
+  var contextText = occLabel
+    ? occLabel.charAt(0).toUpperCase() + occLabel.slice(1) + ' gifts for ' + ageLabel
+    : 'Gifts for ' + ageLabel;
+  document.getElementById('resultsContext').textContent = contextText;
+
+  // Relationship subtitle
+  var rel = answers[1];
+  var line = relationshipLines[rel] || 'Each can be personalised with their name — wrapped in a free luxury gift box.';
+  document.getElementById('resultsSub').innerHTML = line;
+
+  // Personalised email panel copy
+  var occ2 = occasionLabels[answers[2]] || 'gift';
+  var ageShort = { newborn:'newborns', baby:'babies', toddler:'toddlers', child:'little ones', older:'big kids' }[age] || 'little ones';
+  document.getElementById('emailPanelSub').textContent =
+    'We\'ll send you ' + occ2 + ' gift ideas for ' + ageShort + ', seasonal edits and exclusive offers.';
+  document.getElementById('emailTopTitle').textContent = 'More ' + occ2 + ' gift ideas in your inbox';
 }
-async function callAPI(sys,usr){
-  // 35 second frontend timeout — prevents hanging if worker doesn't respond
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 35000);
-  try {
-    const res = await fetch(PROXY_URL, {
-      method: 'POST',
-      signal: controller.signal,
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({system:sys, messages:[{role:'user', content:usr}], max_tokens:5000})
-    });
-    clearTimeout(timeout);
-    const data = await res.json();
-    if(!res.ok) {
-      const msg = typeof data.error==='string' ? data.error : data.error?.message || 'API error';
-      throw new Error(msg);
+
+function focusEmail() {
+  var el = document.getElementById('emailInp');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(function() { el.focus(); }, 300);
+}
+
+function submitEmail() {
+  var val = document.getElementById('emailInp').value;
+  if (val && val.indexOf('@') > -1) {
+    document.getElementById('emailConfirm').style.display = 'block';
+    document.getElementById('emailInp').value = '';
+  }
+}
+
+document.getElementById('emailInp').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') submitEmail();
+});
+
+function restart() {
+  answers = {};
+  document.querySelectorAll('.opt').forEach(function(b) { b.classList.remove('sel'); });
+  document.getElementById('emailConfirm').style.display = 'none';
+  document.getElementById('emailInp').value = '';
+  document.getElementById('step-results').classList.remove('active');
+  goToStep(0);
+}
+
+// Delegated click handler
+document.querySelector('.card').addEventListener('click', function(e) {
+  var btn = e.target;
+  while (btn && btn !== this) {
+    if (btn.tagName === 'BUTTON' && btn.classList.contains('opt') && btn.hasAttribute('data-step')) break;
+    btn = btn.parentElement;
+    if (!btn) return;
+  }
+  if (!btn || btn === this || !btn.classList.contains('opt')) return;
+
+  var step = parseInt(btn.getAttribute('data-step'), 10);
+  var value = btn.getAttribute('data-value');
+  answers[step] = value;
+
+  document.querySelectorAll('.opt[data-step="' + step + '"]').forEach(function(b) { b.classList.remove('sel'); });
+  btn.classList.add('sel');
+
+  if (step === 0) {
+    buildOccasions(value);
+    setTimeout(function() { goToStep(1); }, 180);
+  } else if (step === 1) {
+    // Newborns skip the occasion step — default to new-arrival
+    if (answers[0] === 'newborn') {
+      answers[2] = 'new-arrival';
+      setTimeout(showResults, 180);
+    } else {
+      setTimeout(function() { goToStep(2); }, 180);
     }
-    return parseJSON(data.content.map(b=>b.text||'').join(''));
-  } catch(e) {
-    clearTimeout(timeout);
-    if(e.name === 'AbortError') throw new Error('Request timed out — all models may be at capacity');
-    throw e;
+  } else if (step === 2) {
+    setTimeout(showResults, 180);
   }
-}
-
-// ── EV ─────────────────────────────────────────────────────────────────────────
-function calcEV(t){
-  const wr=(t.backtest_win_rate||t.confidence_pct)/100;
-  const rr = t.buy_price && t.target_price && t.stop_price && (t.buy_price-t.stop_price)>0
-    ? (t.target_price-t.buy_price)/(t.buy_price-t.stop_price)
-    : (t.rr_ratio||1);
-  return Math.round(((wr*rr)-((1-wr)*1))*100)/100;
-}
-function evRankAndTrim(trades){
-  if(!trades||!trades.length)return trades;
-  const w=trades.map(t=>({...t,ev_score:calcEV(t)}));w.sort((a,b)=>b.ev_score-a.ev_score);
-  return w.slice(0,3).map((t,i)=>({...t,rank:i+1}));
-}
-
-// ── MACRO ──────────────────────────────────────────────────────────────────────
-const MACRO_SYS=`Output ONLY raw JSON. No markdown, no prose.
-{"spy":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"qqq":{"current_price":0.00,"trend":"uptrend|downtrend|sideways","price_vs_sr":"above_support|at_resistance|at_support|in_range","key_support":0.00,"key_resistance":0.00,"macro_bias":"bullish|neutral|bearish","note":"max 8 words"},"overall_us_bias":"bullish|neutral|bearish","swing_filter":"max 10 words"}`;
-
-async function getMacroContext(){
-  const indexPrices = await fetchIndexPricesFromPolygon();
-  const spyPrice = indexPrices['SPY'] ? `SPY previous close: $${parseFloat(indexPrices['SPY']).toFixed(2)}.` : '';
-  const qqqPrice = indexPrices['QQQ'] ? `QQQ previous close: $${parseFloat(indexPrices['QQQ']).toFixed(2)}.` : '';
-  const realPriceContext = [spyPrice, qqqPrice].filter(Boolean).join(' ');
-  const macroResult = await callAPI(MACRO_SYS,`Current macro context for US swing trading. ${realPriceContext} Analyse SPY and QQQ S/R levels relative to these previous close prices, trend, bias. Date:${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}.`);
-  if(macroResult) {
-    if(macroResult.spy) macroResult.spy.price_datetime = 'prev close';
-    if(macroResult.qqq) macroResult.qqq.price_datetime = 'prev close';
-  }
-  return macroResult;
-}
-
-function buildSysPrompt(minRR,direction){
-  const learning=buildLearningContext();
-  const dr=direction==='short'?'SHORT only. Entry near resistance, target support, stop above resistance.':direction==='both'?'BOTH long and short.':'LONG only. Buy near support, target resistance, stop below support.';
-  return`Output ONLY raw JSON. No markdown, no prose.
-RULES: ${dr} S/R entries only. R:R>=${minRR}. US stocks, dollars 2dp. stop<buy<target longs. signals:3 max 2 words each. sr_context:max 5 words. macro_alignment:aligned|neutral|divergent. additional_factors:max 2. thesis:max 5 words. sentiment_score:integer 0-100. win_rate 45-65%, sample 10-30.${learning}
-JSON:{"scan_summary":"max 5 words","trades":[{"rank":1,"ticker":"","company":"","exchange":"NYSE|NASDAQ","setup_type":"breakout|accumulation|momentum|breakdown|distribution","direction":"long|short","current_price":0,"buy_price":0,"target_price":0,"stop_price":0,"currency_symbol":"$","rr_ratio":0.0,"expected_days":0,"confidence_pct":0,"signals":["","",""],"additional_factors":[],"earnings_warning":false,"sentiment_score":0,"sentiment_label":"Positive|Neutral|Negative","backtest_win_rate":0,"backtest_sample":0,"backtest_avg_gain":0.0,"sr_context":"","macro_alignment":"aligned|neutral|divergent","key_support":0,"key_resistance":0,"thesis":"","liquidity_note":""}]}`;
-}
-
-const TIERS=[
-  {id:'large',label:'Large Companies',sublabel:'$50+',liquidityNote:false,constraint:'US stocks only. Price above $50. Well-known highly liquid large-cap. Market cap >$5bn. NYSE or NASDAQ.'},
-  {id:'mid',label:'Mid-Size Companies',sublabel:'$10–49',liquidityNote:false,constraint:'US stocks only. Price $10-$49. Mid-cap companies. NYSE or NASDAQ.'},
-  {id:'small',label:'Smaller Companies',sublabel:'High Volume Only',liquidityNote:true,constraint:'US stocks only. Price below $10. MUST have avg daily vol >2M shares and tight spread. NYSE or NASDAQ. Include liquidity_note.'}
-];
-
-// ── MACRO PANEL ────────────────────────────────────────────────────────────────
-let macroOpen = false;
-function toggleMacro(){macroOpen=!macroOpen;document.getElementById('macroBody').classList.toggle('open',macroOpen);document.getElementById('macroToggleBtn').textContent=macroOpen?'▲ Hide':'▼ Show detail';}
-
-function renderMacroPanel(macro){
-  const bc=b=>b==='bullish'?'var(--green)':b==='bearish'?'var(--red)':'var(--sheen)';
-  const bi=b=>b==='bullish'?'▲':b==='bearish'?'▼':'◆';
-  const sr=s=>({above_support:'Above Support',at_resistance:'At Resistance',at_support:'At Support',in_range:'In Range',below_resistance:'Below Resistance'}[s]||s);
-  const ti=t=>t==='uptrend'?'↗ Uptrend':t==='downtrend'?'↘ Downtrend':'→ Sideways';
-  const mkIdx=(key,sym,isPence)=>{const d=macro[key];if(!d)return'';const col=bc(d.macro_bias);
-    const price=d.current_price?(isPence?d.current_price.toLocaleString('en-GB'):'$'+d.current_price.toLocaleString('en-US')):'—';
-    const priceTime=d.price_datetime?`<span style="font-family:var(--mono);font-size:9px;color:var(--sheen);margin-left:6px;">as of ${d.price_datetime}</span>`:'';
-    const sup=isPence?d.key_support:'$'+d.key_support;
-    const res=isPence?d.key_resistance:'$'+d.key_resistance;
-    const pricePct=d.current_price&&d.key_support&&d.key_resistance?Math.round(((d.current_price-d.key_support)/(d.key_resistance-d.key_support))*100):null;
-    const barHtml=pricePct!==null?`<div style="margin:7px 0 5px;"><div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--sheen);margin-bottom:3px;"><span>S ${sup}</span><span>R ${res}</span></div><div style="height:5px;background:var(--chrome-4);border-radius:3px;overflow:visible;position:relative;"><div style="height:100%;width:${Math.min(100,Math.max(0,pricePct))}%;background:linear-gradient(90deg,var(--green-dim),${col});border-radius:3px;"></div><div style="position:absolute;top:-3px;left:calc(${Math.min(100,Math.max(0,pricePct))}% - 4px);width:8px;height:11px;background:${col};border-radius:2px;border:1px solid var(--bg);"></div></div></div>`:'';
-    return`<div class="macro-index"><div class="macro-index-header"><span class="macro-sym">${sym}</span><span style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--white);">${price}</span>${priceTime}<span class="macro-trend" style="color:${col}">${ti(d.trend)}</span><span class="macro-bias-badge" style="color:${col};border-color:${col}">${bi(d.macro_bias)} ${d.macro_bias}</span></div>${barHtml}<div class="macro-note">${sr(d.price_vs_sr)} · ${d.note||''}</div></div>`;};
-  const uc=bc(macro.overall_us_bias||'neutral');
-  const usBias=macro.overall_us_bias||'neutral';
-  const usIcon=usBias==='bullish'?'📈':usBias==='bearish'?'📉':'➡️';
-  return`<div class="macro-panel" id="macroPanel"><div class="macro-header" onclick="toggleMacro()"><div class="macro-title-row"><span class="macro-title">Market Overview</span><div class="macro-overall"><span style="color:${uc}">${usIcon} US ${usBias}</span></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;"><div class="macro-filter-note">${macro.swing_filter||''}</div><span class="macro-toggle" id="macroToggleBtn">▼ Show detail</span></div></div><div class="macro-body" id="macroBody"><div class="macro-indices">${mkIdx('spy','$SPY',false)}${mkIdx('qqq','$QQQ',false)}</div><div style="padding:8px 18px;font-family:var(--mono);font-size:10px;color:var(--green);border-top:1px solid var(--chrome-4);">✓ Index prices sourced live from Twelve Data</div></div></div><div class="tier-divider"></div>`;
-}
-
-// ── LOADING TIPS ENGINE ───────────────────────────────────────────────────────
-const TIPS = [
-  '"The best traders don\'t predict the market. They listen to it." — Eric Tao',
-  '"Volume confirms the move. Price without volume is just noise."',
-  '"A stop loss isn\'t admitting defeat — it\'s protecting your capital for the next trade."',
-  '"Never risk more than 2% of your portfolio on a single trade."',
-  '"The trend is your friend — until it bends."',
-  '"React to what the market is doing, not what you think it should do."',
-  '"Patience is a trading edge. Most people don\'t have it."',
-  '"The market doesn\'t care about your opinion. It only cares about price and volume."',
-  '"Cut losses short, let winners run. Simple to say, hard to do."',
-  '"Support and resistance are where the market has memory."',
-  '"In swing trading, missing a trade is always better than forcing one."',
-  '"Eric Tao knew: conviction without a stop loss is just hope."',
-  '"The best trade you ever make might be the one you don\'t take."',
-  '"Price action tells you everything. Everything else is just context."',
-  '"Breakouts without volume are traps. Volume is the market voting with money."',
-];
-
-let tipInterval = null;
-let tipIndex = 0;
-
-function startTips() {
-  const el = document.getElementById('loadingTip');
-  if(!el) return;
-  tipIndex = Math.floor(Math.random() * TIPS.length);
-  el.textContent = TIPS[tipIndex];
-  tipInterval = setInterval(() => {
-    el.classList.add('fading');
-    setTimeout(() => {
-      tipIndex = (tipIndex + 1) % TIPS.length;
-      el.textContent = TIPS[tipIndex];
-      el.classList.remove('fading');
-    }, 500);
-  }, 6000);
-}
-
-function stopTips() {
-  if(tipInterval) { clearInterval(tipInterval); tipInterval = null; }
-}
-
-// Step definitions
-const SCAN_STEPS = [
-  { id: 'macro',  label: 'Reading US market context (SPY, QQQ)' },
-  { id: 'wait1',  label: 'Preparing large company screen' },
-  { id: 'large',  label: 'Screening + analysing large companies ($50+)' },
-  { id: 'wait2',  label: 'Preparing mid-size company screen' },
-  { id: 'mid',    label: 'Screening + analysing mid-size companies ($10–49)' },
-  { id: 'wait3',  label: 'Preparing smaller company screen' },
-  { id: 'small',  label: 'Screening + analysing smaller companies' },
-];
-
-function renderSteps(activeId, doneIds = [], waitId = null, countdown = null) {
-  const stepsEl = document.getElementById('loadingSteps');
-  if(!stepsEl) return;
-  stepsEl.innerHTML = SCAN_STEPS.map(step => {
-    let iconClass, icon, labelClass, cdText = '';
-    if(doneIds.includes(step.id))      { iconClass='done';    icon='✓'; labelClass='done'; }
-    else if(step.id === activeId)       { iconClass='active';  icon='●'; labelClass='active'; }
-    else if(step.id === waitId)         { iconClass='waiting'; icon='⏳'; labelClass='active'; cdText = countdown ? `${countdown}s` : ''; }
-    else                                { iconClass='pending'; icon='○'; labelClass=''; }
-    return `<div class="loading-step">
-      <div class="step-icon ${iconClass}">${icon}</div>
-      <span class="step-label ${labelClass}">${step.label}</span>
-      <span class="step-countdown">${cdText}</span>
-    </div>`;
-  }).join('');
-}
-
-let cachedMacro = null, macroLoadedAt = null;
-
-async function waitWithCountdown(seconds, waitStepId, doneIds) {
-  for(let s = seconds; s > 0; s--) {
-    renderSteps(null, doneIds, waitStepId, s);
-    setStatus(`Next scan in ${s}s...`, true);
-    await new Promise(r => setTimeout(r, 1000));
-  }
-}
-
-// ── COOLDOWN ENGINE ────────────────────────────────────────────────────────────
-const COOLDOWN_SECS = 300; // 5 minutes
-let cooldownInterval = null;
-
-function startCooldown() {
-  const btn = document.getElementById('scanBtn');
-  const bar = document.getElementById('cooldownBar');
-  const fill = document.getElementById('cooldownFill');
-  const timer = document.getElementById('cooldownTimer');
-  btn.disabled = true;
-  bar.classList.add('visible');
-  let remaining = COOLDOWN_SECS;
-
-  const update = () => {
-    const m = Math.floor(remaining / 60);
-    const s = remaining % 60;
-    timer.textContent = `${m}:${s.toString().padStart(2,'0')}`;
-    fill.style.width = ((remaining / COOLDOWN_SECS) * 100) + '%';
-    if(remaining <= 0) {
-      clearInterval(cooldownInterval);
-      btn.disabled = false;
-      bar.classList.remove('visible');
-      setStatus('Ready — hit SCAN to begin', false);
-    }
-    remaining--;
-  };
-  update();
-  cooldownInterval = setInterval(update, 1000);
-}
-
-// ── MAIN SCAN ──────────────────────────────────────────────────────────────────
-async function runScan(){
-  if(viewingMode) backToLive();
-
-  // Get selected tier from radio buttons
-  const anyTicked   = document.getElementById('tierAny').checked;
-  const largeTicked = document.getElementById('tierLarge').checked;
-  const midTicked   = document.getElementById('tierMid').checked;
-  const smallTicked = document.getElementById('tierSmall').checked;
-  const selectedTiers = anyTicked ? [...TIERS] : TIERS.filter(t =>
-    (t.id === 'large' && largeTicked) ||
-    (t.id === 'mid'   && midTicked)   ||
-    (t.id === 'small' && smallTicked)
-  );
-  const isAnyMode = anyTicked;
-
-  if(selectedTiers.length === 0) {
-    showError('Please select a company size to scan.');
-    return;
-  }
-
-  const btn = document.getElementById('scanBtn');
-  btn.disabled = true; btn.classList.add('loading'); clearError();
-
-  const setup  = document.getElementById('setupSelect').value;
-  const minRR  = document.getElementById('rrSelect').value;
-  const direction = document.getElementById('directionSelect').value;
-  const today  = new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const market = 'best';
-  const mPref = 'US stocks only (NYSE/NASDAQ).';
-  const sFilt  = setup==='all'?'Any pattern':setup+' only';
-  const dirFilt = direction==='long'?'LONG only':direction==='short'?'SHORT only':'BOTH';
-  const sys    = buildSysPrompt(minRR, direction);
-  const scanDateKey = new Date().toISOString().slice(0,10);
-
-  // Build dynamic step list based on selected tiers
-  const dynamicSteps = [{ id: 'macro', label: 'Reading US market context (SPY, QQQ)' }];
-  if(isAnyMode) {
-    dynamicSteps.push({ id: 'wait1', label: 'Preparing screen across all sizes' });
-    dynamicSteps.push({ id: 'any',   label: 'Screening + finding best 3 trades' });
-  } else {
-    selectedTiers.forEach((tier, i) => {
-      dynamicSteps.push({ id: `wait${i+1}`, label: `Preparing ${tier.label} screen` });
-      dynamicSteps.push({ id: tier.id, label: `Screening + analysing ${tier.label}` });
-    });
-  }
-
-  // Show loading panel
-  document.getElementById('loadingPanel').style.display = 'block';
-  document.getElementById('resultsArea').innerHTML = '';
-
-  // Override SCAN_STEPS for renderSteps
-  SCAN_STEPS.length = 0;
-  dynamicSteps.forEach(s => SCAN_STEPS.push(s));
-  renderSteps('macro', []);
-  startTips();
-
-  // ── STEP 1: MACRO ──
-  setStatus('Analysing market context...', true);
-  let macroData = null, macroCtx = '';
-  try {
-    setStatus('Fetching live index prices...', true);
-    macroData = await getMacroContext();
-    cachedMacro = macroData; macroLoadedAt = Date.now();
-    macroCtx = `MACRO: SPY ${macroData.spy?.trend} bias=${macroData.spy?.macro_bias} S=$${macroData.spy?.key_support} R=$${macroData.spy?.key_resistance}. QQQ bias=${macroData.qqq?.macro_bias}. US:${macroData.overall_us_bias}. ${macroData.swing_filter||''}`;
-    renderSteps('macro', ['macro']);
-  } catch(e) {
-    console.warn('Macro failed', e);
-    // Check if it's a rate limit / daily limit error
-    if(e.message && (e.message.includes('capacity') || e.message.includes('rate') || e.message.includes('limit') || e.message.includes('timed out'))) {
-      stopTips();
-      document.getElementById('loadingPanel').style.display = 'none';
-      showError('AI models are at their daily limit. Please try again after midnight UTC (1am BST). The limit resets daily.');
-      setStatus('Daily limit reached — try again after midnight UTC', false);
-      btn.disabled = false; btn.classList.remove('loading');
-      return;
-    }
-    setStatus('Market context unavailable — continuing without macro...', true);
-  }
-
-  // Build results area
-  document.getElementById('resultsArea').innerHTML =
-    (macroData ? renderMacroPanel(macroData) : `<div class="macro-panel"><div class="macro-header"><div class="macro-title-row"><span class="macro-title">Market Overview</span><span style="font-family:var(--mono);font-size:11px;color:var(--sheen)">Unavailable</span></div></div></div>`) +
-    '<div class="tier-divider"></div>' +
-    (isAnyMode
-      ? `<div class="tier-section" id="tier-any"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">Best Opportunities</span><span class="tier-sublabel">Top 3 across all company sizes</span></div><div class="tier-status" id="ts-any"><span class="tier-dot"></span> Queued</div></div><div class="results-grid" id="grid-any">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`
-      : selectedTiers.map(tier=>`<div class="tier-section" id="tier-${tier.id}"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">${tier.label}</span><span class="tier-sublabel">${tier.sublabel}</span></div><div class="tier-status" id="ts-${tier.id}"><span class="tier-dot"></span> Queued</div></div><div class="results-grid" id="grid-${tier.id}">${[0,1,2].map(()=>`<div class="trade-card skeleton"><div class="card-body"><div class="skel-line w60"></div><div class="skel-line w40"></div><div class="skel-line w80"></div></div></div>`).join('')}</div></div>`).join('<div class="tier-divider"></div>')
-    );
-
-  const done = [];
-  const collectedTiers = [];
-
-  if(isAnyMode) {
-    // ── ANY MODE: screen all tiers, pool candidates, single AI call ──────────
-    const tsEl = document.getElementById('ts-any');
-
-    // Wait before screening
-    await waitWithCountdown(20, 'wait1', ['macro']);
-    if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Screening all sizes...`;
-    setStatus('Screening all company sizes...', true);
-
-    // Screen all 3 tiers in parallel (Polygon calls, not AI)
-    const [largeScreen, midScreen, smallScreen] = await Promise.all([
-      fetchScreenedStocks('large'),
-      fetchScreenedStocks('mid'),
-      fetchScreenedStocks('small'),
-    ]);
-
-    // Pool all candidates with tier label attached
-    const allCandidates = [
-      ...(largeScreen.candidates||[]).map(c=>({...c, tierLabel:'Large'})),
-      ...(midScreen.candidates||[]).map(c=>({...c, tierLabel:'Mid-Size'})),
-      ...(smallScreen.candidates||[]).map(c=>({...c, tierLabel:'Smaller'})),
-    ];
-    const screenDate = largeScreen.date || midScreen.date || smallScreen.date || '';
-    const spyChange = largeScreen.spy_change_pct || 0;
-
-    // Sort pooled candidates by score, take top 10 (fewer = less input tokens = more output room)
-    allCandidates.sort((a,b) => b.score - a.score);
-    const top15 = allCandidates.slice(0, 10);
-
-    if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Analysing best picks...`;
-    setStatus('Finding the best 3 across all sizes...', true);
-
-    const candidateList = top15.map(c => {
-      const parts = [
-        c.ticker,
-        `[${c.tierLabel}]`,
-        `O${c.open} H${c.high} L${c.low} C${c.close}`,
-        `V${(c.volume/1000000).toFixed(1)}M`,
-        `chg${c.change_pct}%`,
-        `RS${c.rs_vs_spy>=0?'+':''}${c.rs_vs_spy}`,
-        c.above_vwap !== null ? (c.above_vwap ? 'abvVWAP' : 'blwVWAP') : '',
-        c.closed_near_high ? 'nearHigh' : '',
-        c.earnings_soon ? 'EARNINGS!' : '',
-      ].filter(Boolean).join(' ');
-      return parts;
-    }).join('\n');
-
-    const screenCtx = `\nREAL MARKET DATA from ${screenDate}. SPY change: ${spyChange>=0?'+':''}${spyChange}%.\nTop candidates across ALL company sizes:\n${candidateList}\n\nPick the 3 best swing trade setups from this list. Mix of sizes is fine. Use OHLCV to identify S/R levels and pattern quality.`;
-
-    const up = `Best swing trades across all company sizes. ${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}.${screenCtx}\n${macroCtx}\nReturn exactly 3 trades — the absolute best setups available today regardless of company size.`;
-
-    try {
-      const parsed = await callAPI(sys, up);
-      if(parsed?.trades) {
-        parsed.trades = evRankAndTrim(parsed.trades);
-        parsed.trades = enrichTradesFromScreener(parsed.trades, allCandidates, screenDate);
-      }
-      const anyTier = {id:'any', label:'Best Opportunities', sublabel:'Top 3 across all sizes', liquidityNote:false};
-      renderTierLive(anyTier, parsed, null, scanDateKey);
-      collectedTiers.push({tierId:'any', tierLabel:'Best Opportunities', trades:parsed?.trades||null, error:null});
-    } catch(e) {
-      if(tsEl) tsEl.innerHTML = `<span class="tier-dot failed"></span> Failed`;
-      document.getElementById('grid-any').innerHTML = `<div class="tier-error">⚠ ${e.message}</div>`;
-      collectedTiers.push({tierId:'any', tierLabel:'Best Opportunities', trades:null, error:e.message});
-    }
-
-  } else {
-    // ── SINGLE TIER MODE ─────────────────────────────────────────────────────
-    for(let i = 0; i < selectedTiers.length; i++) {
-      const tier = selectedTiers[i];
-      const waitId = `wait${i+1}`;
-
-      await waitWithCountdown(20, waitId, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
-
-      renderSteps(tier.id, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
-      const tsEl = document.getElementById(`ts-${tier.id}`);
-      if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Screening...`;
-      setStatus(`Screening ${tier.label} with real market data...`, true);
-
-      let screenCtx = '';
-      let screenDate = '';
-      const screenData = await fetchScreenedStocks(tier.id);
-      if(screenData.candidates && screenData.candidates.length > 0) {
-        screenDate = screenData.date || '';
-        const spyChange = screenData.spy_change_pct || 0;
-        const candidateList = screenData.candidates.map(c => {
-          const parts = [
-            c.ticker,
-            `O${c.open} H${c.high} L${c.low} C${c.close}`,
-            `V${(c.volume/1000000).toFixed(1)}M`,
-            `chg${c.change_pct}%`,
-            `RS${c.rs_vs_spy>=0?'+':''}${c.rs_vs_spy}`,
-            c.above_vwap !== null ? (c.above_vwap ? 'abvVWAP' : 'blwVWAP') : '',
-            c.closed_near_high ? 'nearHigh' : '',
-            c.earnings_soon ? 'EARNINGS!' : '',
-          ].filter(Boolean).join(' ');
-          return parts;
-        }).join('\n');
-        screenCtx = `\nREAL MARKET DATA from ${screenDate}. SPY change: ${spyChange>=0?'+':''}${spyChange}%.\nAnalyse ONLY these pre-screened stocks:\n${candidateList}\n\nUse real OHLCV to identify S/R levels. Pick the 3 best setups.`;
-        if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Analysing...`;
-        setStatus(`Analysing ${tier.label} candidates...`, true);
-      } else {
-        screenCtx = '\nNo screener data available — use your training knowledge.';
-        if(tsEl) tsEl.innerHTML = `<span class="tier-dot scanning"></span> Scanning...`;
-        setStatus(`Scanning ${tier.label}...`, true);
-      }
-
-      const up = `${tier.label} swing trades. ${tier.constraint} Market:${mPref}. Pattern:${sFilt}. Direction:${dirFilt}. R:R>=${minRR}. Date:${today}.${screenCtx}\n${macroCtx}\nReturn exactly 3 trades with S/R-based entries.`;
-      try {
-        const parsed = await callAPI(sys, up);
-        if(parsed?.trades) {
-          parsed.trades = evRankAndTrim(parsed.trades);
-          parsed.trades = enrichTradesFromScreener(parsed.trades, screenData.candidates || [], screenData.date || '');
-        }
-        renderTierLive(tier, parsed, null, scanDateKey);
-        collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:parsed?.trades||null, error:null});
-      } catch(e) {
-        renderTierLive(tier, null, e.message, scanDateKey);
-        collectedTiers.push({tierId:tier.id, tierLabel:tier.label, trades:null, error:e.message});
-      }
-      done.push(i);
-      renderSteps(null, ['macro', ...done.map((_,j)=>selectedTiers[j].id)]);
-    }
-  }
-
-  // Done
-  stopTips();
-  document.getElementById('loadingPanel').style.display = 'none';
-  const bar = document.getElementById('statusBar');
-  if(bar) bar.style.display = 'flex';
-  setStatus('Scan complete — next scan available in 5 minutes', false);
-  const summary = collectedTiers.find(r=>r.trades?.length)?.trades?.[0]?.thesis || '';
-  const dl = direction==='long'?'↑ Long':direction==='short'?'↓ Short':'↕ Both';
-  const tierLabels = selectedTiers.map(t=>t.id).join('+');
-  persistScan(collectedTiers, summary, `${market==='best'?'Auto':market} · ${dl} · ${minRR}× · ${tierLabels}`, macroData);
-  btn.classList.remove('loading');
-
-  // Start 5 min cooldown
-  startCooldown();
-}
-
-function renderTierLive(tier,parsed,error,scanDateKey){
-  const se=document.getElementById(`ts-${tier.id}`),ge=document.getElementById(`grid-${tier.id}`);
-  if(error||!parsed?.trades?.length){se.innerHTML=`<span class="tier-dot failed"></span> Failed`;ge.innerHTML=`<div class="tier-error">⚠ ${error||'No trades found'}</div>`;return;}
-  se.innerHTML=`<span class="tier-dot done"></span> ${parsed.trades.length} found`;
-  const off={large:0,mid:3,small:6}[tier.id]||0;
-  ge.innerHTML=parsed.trades.map((t,i)=>renderCard(t,i,off+i,tier,scanDateKey)).join('');
-  setTimeout(()=>animateBars(parsed.trades,off),100);
-}
-
-function renderFromData(tiers,macroData,scanDateKey){
-  if(!tiers?.length){document.getElementById('resultsArea').innerHTML='<div class="empty-state"><div class="empty-icon">道</div><div class="empty-title">No Data</div></div>';return;}
-  const mp=macroData?renderMacroPanel(macroData):`<div class="macro-panel"><div class="macro-header"><div class="macro-title-row"><span class="macro-title">Market Overview</span><span style="font-family:var(--mono);font-size:11px;color:var(--sheen)">Not recorded</span></div></div></div>`;
-  document.getElementById('resultsArea').innerHTML=mp+tiers.map((td,ti)=>{
-    const def=TIERS.find(t=>t.id===td.tierId)||TIERS[ti%3];
-    const sh=td.error?`<span class="tier-dot failed"></span> Error`:`<span class="tier-dot done"></span> ${(td.trades||[]).length} found`;
-    const gh=td.error||!td.trades?`<div class="tier-error">⚠ ${td.error||'No trades'}</div>`:td.trades.map((t,i)=>{if(t.ev_score===undefined)t.ev_score=calcEV(t);return renderCard(t,i,ti*3+i,def,scanDateKey);}).join('');
-    return`<div class="tier-section"><div class="tier-header"><div class="tier-title-group"><span class="tier-label">${td.tierLabel||def.label}</span><span class="tier-sublabel">${def.sublabel}</span></div><div class="tier-status">${sh}</div></div><div class="results-grid">${gh}</div></div>`;
-  }).join('<div class="tier-divider"></div>');
-  tiers.forEach((td,ti)=>{if(td.trades)setTimeout(()=>animateBars(td.trades,ti*3),100);});
-}
-
-function animateBars(trades,off){
-  trades.forEach((t,i)=>{
-    const cf=document.getElementById(`conf-fill-${off+i}`);
-    if(cf)cf.style.width=t.confidence_pct+'%';
-  });
-}
-
-// ── TRADE TRACKER ──────────────────────────────────────────────────────────────
-function doTrack(ticker,scanDateKey,outcome,btnEl){
-  const card=document.querySelector(`[data-ticker="${ticker}"]`)||btnEl.closest('.trade-card');
-  const cashInputEl=document.getElementById(`ti-${ticker}`);const pnlInputEl=document.getElementById(`pnl-${ticker}`);
-  const cashCcy=document.getElementById('cashCurrency').value;const cashAmount=parseFloat(cashInputEl?.value||document.getElementById('cashInput').value)||1000;
-  const t=card?JSON.parse(card.getAttribute('data-tobj')||'null'):null;
-  let pnlGBP=0,pnlUSD=0;
-  if(outcome!=='open'&&t){const ep=pnlInputEl?.value?parseFloat(pnlInputEl.value):null;
-    if(ep!==null){pnlGBP=cashCcy==='GBP'?ep:ep/GBP_USD;pnlUSD=cashCcy==='USD'?ep:ep*GBP_USD;}
-    else{const p=calcCashPnL(t,cashAmount,cashCcy);pnlGBP=outcome==='win'?p.gainGBP:p.lossGBP;pnlUSD=outcome==='win'?p.gainUSD:p.lossUSD;}}
-  const setupType=card?.querySelector('.pattern-badge')?.textContent?.toLowerCase()||'';
-  const exchange=card?.querySelector('.exchange-tag')?.textContent?.split('·')[0]?.trim()||'';
-  recordTrade(ticker,setupType,exchange,outcome,cashAmount,cashCcy,pnlGBP,pnlUSD,scanDateKey);
-  const trackerEl=btnEl.closest('.track-section');
-  if(outcome==='open'){const p=t?calcCashPnL(t,cashAmount,cashCcy):null;trackerEl.innerHTML=`<div class="outcome-recorded open-rec"><span>📌 Open — +${p?fmt(p.gainGBP,'GBP'):'?'} / -${p?fmt(p.lossGBP,'GBP'):'?'}</span><span class="rec-edit" onclick="clearTradeRecord('${ticker}','${scanDateKey}',this)">Clear</span></div>`;}
-  else{const ps=(outcome==='win'?'+':'-')+fmt(pnlGBP,'GBP')+' / '+(outcome==='win'?'+':'-')+fmt(pnlUSD,'USD');trackerEl.innerHTML=`<div class="outcome-recorded ${outcome==='win'?'win-rec':'loss-rec'}"><span>${outcome==='win'?'✓ WIN':'✗ LOSS'} — ${ps}</span><span class="rec-edit" onclick="clearTradeRecord('${ticker}','${scanDateKey}',this)">Edit</span></div>`;const ce=btnEl.closest('.trade-card');if(ce)ce.className=ce.className.replace(/outcome-\w+/g,'')+` outcome-${outcome}`;}
-  toast(outcome==='win'?'✓ Win recorded':outcome==='loss'?'✗ Loss recorded':'📌 Open trade logged',outcome==='loss'?'#6b2828':null);
-}
-
-function clearTradeRecord(ticker,scanDateKey,el){
-  const trades=loadTrades();const idx=trades.findIndex(t=>t.id===ticker+'_'+scanDateKey);if(idx>=0){trades.splice(idx,1);saveTrades(trades);}
-  const card=el.closest('.trade-card');if(card)card.className=card.className.replace(/outcome-\w+/g,'');
-  renderPerformancePanel();renderSidebar();
-}
-
-// ── RENDER CARD ────────────────────────────────────────────────────────────────
-function renderCard(t,i,gIdx,tier,scanDateKey){
-  const rc=['','r2','r3'][i]||'';
-  const isShort=t.direction==='short';
-  const c=t.currency_symbol||'$';
-  const ev=t.ev_score!==undefined?t.ev_score:calcEV(t);
-  const isSimple = viewMode === 'simple';
-
-  // Pattern — simple vs trader language
-  const patternDesc = isSimple
-    ? (SIMPLE_PATTERNS[t.setup_type] || t.setup_type)
-    : (TRADER_PATTERNS[t.setup_type] || t.setup_type);
-  const patternLabel = isSimple ? (
-    {breakout:'Price Breakout',accumulation:'Buying Opportunity',momentum:'Trending Move',breakdown:'Falling Pattern',distribution:'Selling Pressure'}[t.setup_type] || t.setup_type
-  ) : (TRADER_PATTERNS[t.setup_type] || t.setup_type);
-  const patternClass={breakout:'pattern-breakout',accumulation:'pattern-accumulation',momentum:'pattern-momentum',breakdown:'pattern-short',distribution:'pattern-short'}[t.setup_type]||'pattern-breakout';
-  const patternTooltipKey={breakout:'breakout',accumulation:'accumulation',momentum:'momentum',breakdown:'breakdown',distribution:'distribution'}[t.setup_type]||'breakout';
-
-  // Market alignment — simple vs trader
-  const maIcon=t.macro_alignment==='aligned'?'✅':t.macro_alignment==='divergent'?'❌':'⚠️';
-  const maText = isSimple
-    ? (SIMPLE_ALIGNMENT[t.macro_alignment] || 'Market direction unclear')
-    : (t.macro_alignment==='aligned'?'Macro aligned — trend in your favour':t.macro_alignment==='divergent'?'Macro divergent — against market trend':'Macro neutral — no strong tailwind');
-  const maCol=t.macro_alignment==='aligned'?'var(--green)':t.macro_alignment==='divergent'?'var(--red)':'var(--sheen)';
-
-  // Confidence section — simple shows plain bar, trader shows win rate details
-  const confHtml = isSimple ? `
-    <div class="conf-front">
-      <div class="conf-front-header">
-        <span class="conf-front-label">Confidence</span>
-        <span class="conf-front-pct" style="color:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};">${t.confidence_pct}%</span>
-      </div>
-      <div class="conf-front-bar-bg"><div class="conf-front-bar-fill" id="conf-fill-${gIdx}" data-pct="${t.confidence_pct}" style="width:0%;background:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};"></div></div>
-      <div class="conf-front-sub">${t.confidence_pct>=70?'High confidence setup':t.confidence_pct>=50?'Moderate confidence':'Lower confidence — proceed carefully'}</div>
-    </div>` : `
-    <div class="conf-front">
-      <div class="conf-front-header">
-        <span class="conf-front-label">Confidence · ${t.backtest_win_rate}% win rate · ${t.backtest_sample} trades</span>
-        <span class="conf-front-pct" style="color:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};">${t.confidence_pct}%</span>
-      </div>
-      <div class="conf-front-bar-bg"><div class="conf-front-bar-fill" id="conf-fill-${gIdx}" data-pct="${t.confidence_pct}" style="width:0%;background:${t.confidence_pct>=70?'var(--green)':t.confidence_pct>=50?'var(--amber)':'var(--red)'};"></div></div>
-      <div class="conf-front-sub" style="display:flex;justify-content:space-between;"><span>${t.confidence_pct>=70?'Strong setup':'Moderate setup'}</span><span style="color:var(--sheen)">EV: ${ev>=0?'+':''}${ev.toFixed(2)} · R:R ${realRR}:1 · ~${t.expected_days}d hold</span></div>
-    </div>`;
-
-  // Why this trade — simple is thesis only, trader adds signals + S/R
-  const signalChips = isSimple ? '' : (t.signals||[]).map(s=>`<span class="signal-chip strong">${s}</span>`).join('');
-  // Calculate real R:R from actual prices — don't trust AI's rr_ratio field
-  const realRR = t.buy_price && t.target_price && t.stop_price && (t.buy_price - t.stop_price) > 0
-    ? Math.round(((t.target_price - t.buy_price) / (t.buy_price - t.stop_price)) * 100) / 100
-    : t.rr_ratio;
-  const rrPlain = `For every £1 you risk, you could make £${realRR}`;
-
-  // S/R row for trader mode
-  const srRow = !isSimple && (t.key_support || t.key_resistance) ? `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;">
-      ${t.key_support ? `<div style="padding:8px 10px;background:rgba(76,175,125,.07);border:1px solid var(--green-dim);border-radius:5px;text-align:center;">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Support</div>
-        <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green);">$${parseFloat(t.key_support).toFixed(2)}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--sheen);margin-top:2px;">${t.current_price && t.key_support ? ((t.current_price-t.key_support)/t.key_support*100).toFixed(1)+'% away' : ''}</div>
-      </div>` : ''}
-      ${t.key_resistance ? `<div style="padding:8px 10px;background:rgba(201,64,64,.07);border:1px solid var(--red-dim);border-radius:5px;text-align:center;">
-        <div style="font-family:var(--mono);font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;">Resistance</div>
-        <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red);">$${parseFloat(t.key_resistance).toFixed(2)}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--sheen);margin-top:2px;">${t.current_price && t.key_resistance ? ((t.key_resistance-t.current_price)/t.current_price*100).toFixed(1)+'% away' : ''}</div>
-      </div>` : ''}
-    </div>` : '';
-
-  const whyHtml = `
-    <div class="thesis-label">${isSimple ? 'Why this trade' : 'Thesis & Signals'}</div>
-    <div class="thesis-row">${t.thesis}</div>
-    ${signalChips ? `<div class="signals" style="margin-top:6px;">${signalChips}</div>` : ''}
-    ${srRow}
-    ${isSimple ? `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:8px 11px;background:var(--bg);border:1px solid var(--chrome-4);border-radius:5px;">
-      <span style="font-family:var(--mono);font-size:10px;color:var(--sheen);">Reward/Risk <span style="cursor:pointer;color:var(--steel);" onclick="showTooltip('rr')">ℹ</span></span>
-      <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--green);">${realRR}× &nbsp;<span style="font-size:10px;color:var(--sheen);font-weight:400;">${rrPlain}</span></span>
-    </div>` : ''}`;
-
-  // Volume + RS badge — trader mode shows more detail
-  const volBadge = t.volume_ratio
-    ? `<div class="exchange-tag" style="color:var(--green);border-color:var(--green-dim);background:rgba(76,175,125,.08);">📊 ${isSimple ? 'Unusual volume' : t.volume_ratio+'× avg vol'}</div>`
-    : '';
-  const rsBadge = !isSimple && t.rs_vs_spy !== undefined
-    ? `<div class="exchange-tag" style="color:${t.rs_vs_spy>=0?'var(--green)':'var(--red)'};border-color:${t.rs_vs_spy>=0?'var(--green-dim)':'var(--red-dim)'};background:${t.rs_vs_spy>=0?'rgba(76,175,125,.08)':'rgba(201,64,64,.08)'};">RS vs SPY: ${t.rs_vs_spy>=0?'+':''}${t.rs_vs_spy}%</div>`
-    : '';
-
-  // More detail button label
-  const detailBtnLabel = isSimple ? '▼ Full analysis' : '▼ Technical detail';
-
-  // Cash
-  const ca=parseFloat(document.getElementById('cashInput').value)||1000;const cc=document.getElementById('cashCurrency').value;const pnl=calcCashPnL(t,ca,cc);
-
-  // Earnings warning
-  const ewHtml=t.earnings_warning?`<div class="earnings-warning"><span class="ew-icon">⚠️</span><span class="ew-text">Earnings announcement soon — extra risk</span><span class="ew-info" onclick="showTooltip('earnings')">ℹ What's this?</span></div>`:'';
-
-  // Tracker
-  const existing=loadTrades().find(tr=>tr.id===t.ticker+'_'+(scanDateKey||''));const outcomeClass=existing?(existing.outcome==='win'?'outcome-win':existing.outcome==='loss'?'outcome-loss':''):'';
-  let trackerContent='';
-  if(existing&&existing.outcome!=='open'){const ps=(existing.outcome==='win'?'+':'-')+fmt(existing.pnlGBP,'GBP')+' / '+(existing.outcome==='win'?'+':'-')+fmt(existing.pnlUSD,'USD');trackerContent=`<div class="outcome-recorded ${existing.outcome==='win'?'win-rec':'loss-rec'}"><span>${existing.outcome==='win'?'✓ WIN':'✗ LOSS'} — ${ps}</span><span class="rec-edit" onclick="clearTradeRecord('${t.ticker}','${scanDateKey}',this)">Edit</span></div>`;}
-  else if(existing?.outcome==='open'){trackerContent=`<div class="outcome-recorded open-rec"><span>📌 Open — +${fmt(pnl.gainGBP,'GBP')} / -${fmt(pnl.lossGBP,'GBP')}</span><span class="rec-edit" onclick="clearTradeRecord('${t.ticker}','${scanDateKey}',this)">Clear</span></div>`;}
-  else{trackerContent=`<div class="tracker-title">Track this trade</div><div class="tracker-amount-row"><label>Cash</label><input class="tracker-input" type="number" id="ti-${t.ticker}" value="${ca}" min="1"><span class="tracker-currency">${cc}</span></div><div class="outcome-buttons"><button class="outcome-btn btn-track-open" onclick="doTrack('${t.ticker}','${scanDateKey||''}','open',this)">📌 Open</button><button class="outcome-btn btn-track-win" onclick="doTrack('${t.ticker}','${scanDateKey||''}','win',this)">✓ Win</button><button class="outcome-btn btn-track-loss" onclick="doTrack('${t.ticker}','${scanDateKey||''}','loss',this)">✗ Loss</button></div><div class="outcome-result-row"><label>Actual P&L</label><input class="tracker-input" type="number" id="pnl-${t.ticker}" placeholder="optional" min="0" style="width:90px;"><span class="tracker-currency">${cc}</span></div>`;}
-
-  // Encode trade for detail panel
-  const encoded=encodeURIComponent(JSON.stringify(t));
-
-  return`<div class="trade-card ${outcomeClass}" style="animation-delay:${i*.08}s" data-trade='${JSON.stringify(t)}' data-ticker="${t.ticker}" data-tobj='${JSON.stringify(t)}' data-scandate="${scanDateKey}" data-tierid="${tier.id}" data-cardidx="${i}" data-gidx="${gIdx}">
-    <div class="card-header">
-      <div class="rank-badge ${rc}">${t.rank}</div>
-      <div class="stock-info">
-        <div class="ticker">${t.ticker}</div>
-        <div class="company-name">${t.company}</div>
-        <div class="exchange-tag">${t.exchange} · ${c}${parseFloat(t.current_price).toFixed(2)}</div>
-        ${volBadge}
-        ${rsBadge}
-      </div>
-      <div class="card-badges">
-        <span class="dir-badge ${isShort?'short-badge':'long-badge'}">${isShort?'↓ Sell Short':'↑ Buy'}</span>
-        <span class="pattern-badge ${patternClass}" onclick="showTooltip('${patternTooltipKey}')">${patternLabel} ℹ</span>
-      </div>
-    </div>
-    <div class="card-body">
-      ${ewHtml}
-
-      <div class="market-trend-row">
-        <span class="mt-icon">${maIcon}</span>
-        <span class="mt-text" style="color:${maCol}">${maText}</span>
-        <button class="mt-info-btn" onclick="showTooltip('markettrend')">ℹ</button>
-      </div>
-
-      <div class="price-levels">
-        <div class="level-box buy">
-          <div class="level-label">${isShort?'Sell at':'Buy at'}</div>
-          <div class="level-value">${c}${parseFloat(t.buy_price).toFixed(2)}</div>
-        </div>
-        <div class="level-box target">
-          <div class="level-label">Take profit</div>
-          <div class="level-value">${c}${parseFloat(t.target_price).toFixed(2)}</div>
-        </div>
-        <div class="level-box stop">
-          <div class="level-label" style="cursor:pointer" onclick="showTooltip('stop')">Get out if ℹ</div>
-          <div class="level-value">${c}${parseFloat(t.stop_price).toFixed(2)}</div>
-        </div>
-      </div>
-      <div style="font-family:var(--mono);font-size:9px;margin:-6px 0 10px;padding:0 2px;color:${t.price_updated?'var(--green)':'var(--sheen)'};">
-        ${t.price_updated ? `📊 Close price: ${t.price_datetime ? formatPriceDate(t.price_datetime) : 'prev session'} · Polygon.io` : '⚠ AI estimate — verify before trading'}
-      </div>
-
-      <div class="cash-estimate">
-        <div class="cash-box gain-box">
-          <div class="cash-lbl">Potential profit</div>
-          <div class="cash-val gain-val">+${fmt(pnl.gainGBP,'GBP')}</div>
-          <div class="cash-dual gain-dual">≈ +${fmt(pnl.gainUSD,'USD')}</div>
-        </div>
-        <div class="cash-box risk-box">
-          <div class="cash-lbl">Max risk</div>
-          <div class="cash-val loss-val">-${fmt(pnl.lossGBP,'GBP')}</div>
-          <div class="cash-dual loss-dual">≈ -${fmt(pnl.lossUSD,'USD')}</div>
-        </div>
-      </div>
-
-      ${confHtml}
-      ${whyHtml}
-
-      <button class="more-detail-btn" onclick="openDetail('${encoded}')">${detailBtnLabel}</button>
-
-      <div class="track-section" style="margin-top:12px;">${trackerContent}</div>
-    </div>
-  </div>`;
-}
-
-// ── INIT ───────────────────────────────────────────────────────────────────────
-renderSidebar();
-renderPerformancePanel();
+});
 </script>
 </body>
 </html>
